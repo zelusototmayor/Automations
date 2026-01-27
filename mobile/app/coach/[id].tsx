@@ -225,7 +225,7 @@ export default function CoachDetailScreen() {
                   Free Preview Available
                 </Text>
                 <Text className="text-body-sm text-primary-600">
-                  Try 1 free message with this coach before subscribing
+                  Try 5 free messages with this coach before subscribing
                 </Text>
               </View>
             </View>

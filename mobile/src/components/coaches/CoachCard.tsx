@@ -388,7 +388,7 @@ export function CoachCard({
               className="text-body-sm font-inter-medium"
               style={{ color: 'white' }}
             >
-              Try 1 message free
+              Try 5 messages free
             </Text>
           </Pressable>
         </View>

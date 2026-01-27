@@ -31,11 +31,13 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
     }
 
     // Check if user can send message (premium or free trial)
-    const { allowed, reason } = await canSendMessage(userId, agent_id);
+    const { allowed, reason, freeTrialRemaining, freeTrialLimit } = await canSendMessage(userId, agent_id);
     if (!allowed) {
       res.status(403).json({
         error: 'Free trial exhausted. Subscribe to continue.',
         code: reason,
+        freeTrialRemaining: 0,
+        freeTrialLimit: freeTrialLimit,
       });
       return;
     }
@@ -155,8 +157,13 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
       // Record free trial usage if this was a free trial message
       await recordFreeTrial(userId, agent_id);
 
-      // Send completion signal
-      res.write(`data: ${JSON.stringify({ done: true, conversation_id: convId })}\n\n`);
+      // Send completion signal with free trial info
+      const completionData: any = { done: true, conversation_id: convId };
+      if (freeTrialRemaining !== undefined) {
+        completionData.freeTrialRemaining = freeTrialRemaining;
+        completionData.freeTrialLimit = freeTrialLimit;
+      }
+      res.write(`data: ${JSON.stringify(completionData)}\n\n`);
       res.end();
     } catch (streamError: any) {
       console.error('Streaming error:', streamError);
