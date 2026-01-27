@@ -1,0 +1,78 @@
+# Kamal deployment configuration for Better Coaching
+service: bettercoaching
+
+# Docker image (will be pushed to Docker Hub)
+image: zelusottomayor/bettercoaching
+
+# Deploy to your DigitalOcean droplet
+servers:
+  web:
+    hosts:
+      - DROPLET_IP_HERE  # You'll provide this
+    labels:
+      traefik.http.routers.bettercoaching.rule: Host(`YOUR_DOMAIN_HERE`) || Host(`www.YOUR_DOMAIN_HERE`)
+      traefik.http.routers.bettercoaching.tls: true
+      traefik.http.routers.bettercoaching.tls.certresolver: letsencrypt
+    options:
+      cpus: "0.50"
+      memory: "512m"
+
+proxy:
+  ssl: true
+  host: YOUR_DOMAIN_HERE
+  app_port: 3000
+  healthcheck:
+    path: /health
+    interval: 10
+    timeout: 5
+
+registry:
+  username: zelusottomayor
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    NODE_ENV: production
+    PORT: 3000
+  secret:
+    - DATABASE_URL
+    - JWT_SECRET
+    - JWT_REFRESH_SECRET
+    - ENCRYPTION_KEY
+    - ANTHROPIC_API_KEY
+    - OPENAI_API_KEY
+    - GOOGLE_API_KEY
+    - REVENUECAT_WEBHOOK_SECRET
+    - CORS_ORIGIN
+
+# PostgreSQL database and Redis (optional, for future caching)
+accessories:
+  db:
+    image: postgres:16
+    host: DROPLET_IP_HERE
+    port: 5432
+    env:
+      clear:
+        POSTGRES_DB: bettercoaching_production
+      secret:
+        - POSTGRES_USER
+        - POSTGRES_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data
+    cmd: >
+      postgres -c shared_preload_libraries=vector
+
+# Builder configuration
+builder:
+  arch: amd64
+  context: ./backend
+  dockerfile: Dockerfile
+
+# SSH options
+ssh:
+  user: root
+
+# Boot timeout
+boot:
+  limit: 45

@@ -7,6 +7,10 @@ node_modules/
 .env.production
 .env.*.local
 
+# Kamal secrets (deployment credentials)
+.kamal/secrets
+.kamal/secrets-*
+
 # Build outputs
 dist/
 build/
