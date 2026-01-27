@@ -1,10 +1,11 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StarRating, SessionCount } from '../ui/Rating';
 import { TierBadge, VerifiedBadge, Badge } from '../ui/Badge';
 import { VerifiedIcon, GiftIcon, PencilIcon, StarIcon, CheckIcon } from '../ui/Icons';
 import type { Agent } from '../../types';
+import { getAvatarByHash } from '../../utils/avatars';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UI DESIGN SPEC V1 COLORS
@@ -48,6 +49,52 @@ function getInitial(name: string): string {
   return name.charAt(0).toUpperCase();
 }
 
+// Helper component to render avatar (image or gradient with initial)
+interface AvatarProps {
+  agent: Agent;
+  size: number;
+  borderRadius: number;
+  showInitial?: boolean;
+}
+
+function Avatar({ agent, size, borderRadius, showInitial = true }: AvatarProps) {
+  const gradientColors = getAvatarGradient(agent.name);
+  const initial = getInitial(agent.name);
+
+  // Use avatar_url if available, otherwise use local avatar based on hash, otherwise gradient
+  const avatarSource = agent.avatar_url
+    ? { uri: agent.avatar_url }
+    : getAvatarByHash(agent.name);
+
+  if (agent.avatar_url || !showInitial) {
+    return (
+      <View style={{ width: size, height: size, borderRadius, overflow: 'hidden' }}>
+        <Image
+          source={avatarSource}
+          style={{ width: size, height: size }}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  }
+
+  // Fallback to gradient with initial
+  return (
+    <LinearGradient
+      colors={gradientColors}
+      style={{
+        width: size,
+        height: size,
+        borderRadius,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text className="text-xl font-inter-bold text-white">{initial}</Text>
+    </LinearGradient>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // COACH CARD COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
@@ -74,8 +121,6 @@ export function CoachCard({
   className = '',
 }: CoachCardProps) {
   const router = useRouter();
-  const gradientColors = getAvatarGradient(agent.name);
-  const initial = getInitial(agent.name);
 
   const handlePress = () => {
     if (onPress) {
@@ -102,14 +147,10 @@ export function CoachCard({
         style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
       >
         <View className="p-4">
-          {/* Avatar with gradient */}
-          <LinearGradient
-            colors={gradientColors}
-            className="w-14 h-14 rounded-avatar items-center justify-center mb-3"
-            style={{ borderRadius: 14 }}
-          >
-            <Text className="text-xl font-inter-bold text-white">{initial}</Text>
-          </LinearGradient>
+          {/* Avatar */}
+          <View className="mb-3">
+            <Avatar agent={agent} size={56} borderRadius={14} showInitial={false} />
+          </View>
 
           {/* Name */}
           <Text
@@ -161,14 +202,10 @@ export function CoachCard({
         style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
       >
         <View className="p-4 flex-row">
-          {/* Avatar with gradient */}
-          <LinearGradient
-            colors={gradientColors}
-            className="w-14 h-14 rounded-avatar items-center justify-center mr-4"
-            style={{ borderRadius: 14 }}
-          >
-            <Text className="text-xl font-inter-bold text-white">{initial}</Text>
-          </LinearGradient>
+          {/* Avatar */}
+          <View className="mr-4">
+            <Avatar agent={agent} size={56} borderRadius={14} showInitial={false} />
+          </View>
 
           {/* Content */}
           <View className="flex-1">
@@ -266,35 +303,13 @@ export function CoachCard({
         <View className="p-3.5">
           {/* Top section: Large Photo + Info */}
           <View className="flex-row mb-3">
-            {/* Photo placeholder with gradient - larger square */}
-            <View className="relative">
-              <LinearGradient
-                colors={gradientColors}
-                style={{
-                  width: 68,
-                  height: 80,
-                  borderRadius: 18, // Spec: 18-20px for smaller elements
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {/* Letter badge overlay in top-left */}
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 6,
-                    left: 6,
-                    backgroundColor: 'rgba(255,255,255,0.25)',
-                    borderRadius: 4,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                  }}
-                >
-                  <Text className="text-sm font-inter-bold text-white">
-                    {initial}
-                  </Text>
-                </View>
-              </LinearGradient>
+            {/* Photo */}
+            <View className="relative" style={{ width: 68, height: 80, borderRadius: 18, overflow: 'hidden' }}>
+              <Image
+                source={agent.avatar_url ? { uri: agent.avatar_url } : getAvatarByHash(agent.name)}
+                style={{ width: 68, height: 80 }}
+                resizeMode="cover"
+              />
             </View>
 
             {/* Info section - to the right of photo */}
@@ -416,14 +431,10 @@ export function CoachCard({
       <View className="p-4">
         {/* Header row with avatar, name, and price */}
         <View className="flex-row items-start">
-          {/* Avatar with gradient */}
-          <LinearGradient
-            colors={gradientColors}
-            className="w-13 h-13 rounded-avatar items-center justify-center mr-3"
-            style={{ width: 52, height: 52, borderRadius: 14 }}
-          >
-            <Text className="text-xl font-inter-bold text-white">{initial}</Text>
-          </LinearGradient>
+          {/* Avatar */}
+          <View className="mr-3">
+            <Avatar agent={agent} size={52} borderRadius={14} showInitial={false} />
+          </View>
 
           {/* Name and description */}
           <View className="flex-1">
