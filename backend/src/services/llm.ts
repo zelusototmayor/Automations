@@ -29,7 +29,7 @@ function getOpenAIClient(): OpenAI {
 
 function getGoogleClient(): GoogleGenerativeAI {
   if (!googleClient) {
-    googleClient = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+    googleClient = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
   }
   return googleClient;
 }
@@ -157,6 +157,16 @@ export async function* generateCoachResponse(
   }
 }
 
+// Helper to create an AbortController with a 60-second timeout
+function createLLMAbortController(timeoutMs = 60_000): { controller: AbortController; cleanup: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return {
+    controller,
+    cleanup: () => clearTimeout(timer),
+  };
+}
+
 async function* generateAnthropicResponse(
   systemPrompt: string,
   messages: ChatMessage[],
@@ -164,22 +174,27 @@ async function* generateAnthropicResponse(
   temperature: number
 ): AsyncGenerator<string, void, unknown> {
   const client = getAnthropicClient();
+  const { controller, cleanup } = createLLMAbortController();
 
-  const stream = await client.messages.stream({
-    model,
-    max_tokens: 2048,
-    temperature,
-    system: systemPrompt,
-    messages: messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
-  });
+  try {
+    const stream = await client.messages.stream({
+      model,
+      max_tokens: 2048,
+      temperature,
+      system: systemPrompt,
+      messages: messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    }, { signal: controller.signal as any });
 
-  for await (const event of stream) {
-    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-      yield event.delta.text;
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        yield event.delta.text;
+      }
     }
+  } finally {
+    cleanup();
   }
 }
 
@@ -190,26 +205,31 @@ async function* generateOpenAIResponse(
   temperature: number
 ): AsyncGenerator<string, void, unknown> {
   const client = getOpenAIClient();
+  const { controller, cleanup } = createLLMAbortController();
 
-  const stream = await client.chat.completions.create({
-    model,
-    temperature,
-    max_tokens: 2048,
-    stream: true,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...messages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      })),
-    ],
-  });
+  try {
+    const stream = await client.chat.completions.create({
+      model,
+      temperature,
+      max_tokens: 2048,
+      stream: true,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        })),
+      ],
+    }, { signal: controller.signal as any });
 
-  for await (const chunk of stream) {
-    const content = chunk.choices[0]?.delta?.content;
-    if (content) {
-      yield content;
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
     }
+  } finally {
+    cleanup();
   }
 }
 
@@ -221,30 +241,37 @@ async function* generateGoogleResponse(
 ): AsyncGenerator<string, void, unknown> {
   const client = getGoogleClient();
   const genModel = client.getGenerativeModel({ model });
+  const { controller, cleanup } = createLLMAbortController();
 
-  // Convert messages to Google's format
-  const history = messages.slice(0, -1).map((m) => ({
-    role: m.role === 'user' ? 'user' : 'model',
-    parts: [{ text: m.content }],
-  }));
+  try {
+    // Convert messages to Google's format
+    const history = messages.slice(0, -1).map((m) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.content }],
+    }));
 
-  const chat = genModel.startChat({
-    history: history as any,
-    generationConfig: {
-      temperature,
-      maxOutputTokens: 2048,
-    },
-    systemInstruction: systemPrompt,
-  });
+    const chat = genModel.startChat({
+      history: history as any,
+      generationConfig: {
+        temperature,
+        maxOutputTokens: 2048,
+      },
+      systemInstruction: systemPrompt,
+    });
 
-  const lastMessage = messages[messages.length - 1];
-  const result = await chat.sendMessageStream(lastMessage.content);
+    const lastMessage = messages[messages.length - 1];
+    const result = await chat.sendMessageStream(lastMessage.content, {
+      signal: controller.signal as any,
+    });
 
-  for await (const chunk of result.stream) {
-    const text = chunk.text();
-    if (text) {
-      yield text;
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      if (text) {
+        yield text;
+      }
     }
+  } finally {
+    cleanup();
   }
 }
 

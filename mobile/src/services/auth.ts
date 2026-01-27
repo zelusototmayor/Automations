@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3003/api';
+// Default port 3000 matches backend default (PORT=3000 in backend/.env.example)
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'coachcraft_access_token';

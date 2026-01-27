@@ -186,7 +186,7 @@ export default function WelcomeScreen() {
                 letterSpacing: -0.5,
               }}
             >
-              CoachCraft
+              Better Coaching
             </Text>
             <Text
               className="font-inter-regular"
