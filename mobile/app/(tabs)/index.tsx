@@ -165,16 +165,17 @@ export default function HomeScreen() {
                   <Pressable
                     key={conversation.id}
                     onPress={() => router.push(`/chat/${agent.id}?conversationId=${conversation.id}`)}
-                    className="mr-3 rounded-2xl overflow-hidden"
+                    className="mr-3 overflow-hidden"
                     style={{
                       backgroundColor: colors.surface,
                       borderWidth: 1,
                       borderColor: colors.border,
+                      borderRadius: 12,
                       width: 170,
                       shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.06,
-                      shadowRadius: 8,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 3,
                       elevation: 2,
                     }}
                   >
@@ -310,11 +311,16 @@ export default function HomeScreen() {
         {/* Add Your Coach Footer */}
         <Pressable
           onPress={() => router.push('/explore')}
-          className="mx-5 mb-8 py-4 px-4 flex-row items-center rounded-xl"
+          className="mx-5 mb-8 py-4 px-4 flex-row items-center"
           style={{
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: colors.border,
+            borderRadius: 12,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 3,
           }}
         >
           <View

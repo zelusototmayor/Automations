@@ -194,16 +194,16 @@ module.exports = {
       },
 
       borderRadius: {
-        'card': '22px',       // Spec: 22px (was 16px)
-        'card-sm': '18px',    // Spec: 18-20px (was 14px)
-        'button': '20px',     // Spec: 18-20px (was 14px)
-        'input': '20px',      // Spec: 18-20px (new)
-        'chip': '22px',       // Spec: 22px (was 20px)
-        'pill': '9999px',     // Unchanged
+        'card': '12px',       // Professional, crisp cards (was 22px)
+        'card-sm': '10px',    // Smaller cards/elements
+        'button': '10px',     // Buttons (was 20px)
+        'input': '10px',      // Inputs/search bars (was 20px)
+        'chip': '10px',       // Pills/chips (was 22px)
+        'pill': '9999px',     // Full pill shape
         'avatar': '14px',     // Unchanged
         'avatar-sm': '12px',  // Unchanged
         'avatar-lg': '22px',  // Unchanged
-        'tab-bar': '24px',    // Spec: 22-24px (was 30px)
+        'tab-bar': '0px',     // No rounded corners on tab bar
       },
 
       spacing: {
@@ -214,20 +214,14 @@ module.exports = {
       },
 
       boxShadow: {
-        // UI Design Spec V1 - Wide/soft shadows
-        'sm': '0 4px 12px rgba(17, 24, 39, 0.04)',
-        'md': '0 8px 20px rgba(17, 24, 39, 0.06)',
-        'lg': '0 12px 36px rgba(17, 24, 39, 0.08)',
-        // Card shadow (spec): 0 10px 28px rgba(17,24,39,0.06)
-        'card': '0 10px 28px rgba(17, 24, 39, 0.06)',
-        'card-hover': '0 14px 36px rgba(17, 24, 39, 0.08)',
-        'button': '0 6px 16px rgba(17, 24, 39, 0.08)',
-        // Elevated shadow (spec): 0 18px 50px rgba(17,24,39,0.12)
-        'elevated': '0 18px 50px rgba(17, 24, 39, 0.12)',
-        // FAB shadow (spec): 0 16px 34px rgba(17,24,39,0.28)
-        'fab': '0 16px 34px rgba(17, 24, 39, 0.28)',
-        // Liquid glass shadow
-        'glass': '0 10px 28px rgba(17, 24, 39, 0.06)',
+        // Clean, subtle shadows - Linear/Notion style
+        'sm': '0 1px 2px rgba(0, 0, 0, 0.06)',
+        'md': '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        'lg': '0 4px 6px rgba(0, 0, 0, 0.1)',
+        // Card shadow - subtle and crisp
+        'card': '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        'card-hover': '0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        'button': '0 1px 2px rgba(0, 0, 0, 0.06)',
       },
 
       // Backdrop blur for liquid glass effect

@@ -37,7 +37,7 @@ export function CategoryChip({
     <Pressable
       onPress={onPress}
       className={[
-        'px-5 py-2.5 rounded-chip mr-2',
+        'px-5 py-2.5 mr-2',
         'active:opacity-80',
         className,
       ].filter(Boolean).join(' ')}
@@ -45,6 +45,7 @@ export function CategoryChip({
         backgroundColor: selected ? colors.primary : colors.surface,
         borderWidth: 1,
         borderColor: selected ? colors.primary : colors.border,
+        borderRadius: 10,
       }}
     >
       <Text
@@ -144,8 +145,12 @@ export function CategoryCard({
         backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 22, // Spec card/chip radius
+        borderRadius: 12,
         minWidth: 140,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
       }}
     >
       {/* Subtle initial circle on left - smaller 32px */}

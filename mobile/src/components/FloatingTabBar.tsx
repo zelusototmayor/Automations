@@ -25,30 +25,20 @@ import {
 } from './ui/Icons';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURATION - Easy to tweak
+// CONFIGURATION - Clean, professional design
 // ═══════════════════════════════════════════════════════════════════════════
 
 const CONFIG = {
   // Container
-  bottomMargin: 8,
-  horizontalMargin: 16,
-  containerHeight: 72,
-  containerRadius: 32,
+  bottomMargin: 0,
+  horizontalMargin: 0,
+  containerHeight: 60,
+  containerRadius: 0,
   containerPaddingHorizontal: 8,
 
-  // Glass effect
-  glassBackground: 'rgba(255, 255, 255, 0.85)',
-  glassBorder: 'rgba(255, 255, 255, 0.5)',
-  blurIntensity: 80,
-
-  // Shadow (iOS)
-  shadowColor: '#000',
-  shadowOpacity: 0.08,
-  shadowRadius: 18,
-  shadowOffsetY: 8,
-
-  // Android elevation
-  androidElevation: 12,
+  // Background - clean white
+  background: '#FFFFFF',
+  borderColor: '#E5E7EB',
 
   // Icon
   iconSize: 24,
@@ -60,14 +50,8 @@ const CONFIG = {
   labelFontWeight: '500' as const,
   iconLabelSpacing: 4,
 
-  // Active pill highlight
-  activePillWidth: 56,
-  activePillHeight: 56,
-  activePillRadius: 20,
-  activePillBackground: 'rgba(255, 255, 255, 1)',
-  activePillShadowOpacity: 0.12,
-  activePillShadowRadius: 8,
-  activeIconScale: 1.05,
+  // Animation
+  activeIconScale: 1.0, // No scale on active
 
   // Badge
   badgeSize: 18,
@@ -79,23 +63,15 @@ const CONFIG = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COLORS - Matching UI Design Spec V1
+// COLORS - NEUTRAL BASE WITH SAGE ACCENT
 // ═══════════════════════════════════════════════════════════════════════════
 
 const COLORS = {
-  // Primary palette (from spec)
-  sage: '#6F8F79',
-  sageDark: '#4F6F5A',
-  sageLight: '#DCE9DF',
+  // Active state - sage green accent
+  activeColor: '#4A7C59',
 
-  // Text
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-
-  // Active state - using sage theme
-  activeColor: '#4F6F5A',
-  inactiveColor: '#374151', // Much darker gray for strong contrast
+  // Inactive state - neutral gray
+  inactiveColor: '#9CA3AF',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -176,11 +152,6 @@ function TabItem({ tab, focused, onPress, onLongPress }: TabItemProps) {
       accessibilityState={{ selected: focused }}
       accessibilityLabel={tab.label}
     >
-      {/* Active pill highlight */}
-      {focused && (
-        <View style={styles.activePill} />
-      )}
-
       <Animated.View style={[styles.iconContainer, animatedStyle]}>
         <IconComponent
           size={CONFIG.iconSize}
@@ -284,19 +255,7 @@ export function FloatingTabBar({
       pointerEvents="box-none"
     >
       <View style={styles.tabBarWrapper}>
-        {Platform.OS === 'ios' ? (
-          <BlurView
-            intensity={CONFIG.blurIntensity}
-            tint="light"
-            style={styles.blurContainer}
-          >
-            {TabBarContent}
-          </BlurView>
-        ) : (
-          <View style={[styles.blurContainer, styles.androidFallback]}>
-            {TabBarContent}
-          </View>
-        )}
+        {TabBarContent}
       </View>
     </View>
   );
@@ -316,26 +275,9 @@ const styles = StyleSheet.create({
   },
 
   tabBarWrapper: {
-    borderRadius: CONFIG.containerRadius,
-    overflow: 'hidden',
-    // iOS shadow
-    shadowColor: CONFIG.shadowColor,
-    shadowOffset: { width: 0, height: CONFIG.shadowOffsetY },
-    shadowOpacity: CONFIG.shadowOpacity,
-    shadowRadius: CONFIG.shadowRadius,
-    // Android elevation
-    elevation: CONFIG.androidElevation,
-  },
-
-  blurContainer: {
-    borderRadius: CONFIG.containerRadius,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: CONFIG.glassBorder,
-  },
-
-  androidFallback: {
-    backgroundColor: CONFIG.glassBackground,
+    backgroundColor: CONFIG.background,
+    borderTopWidth: 1,
+    borderTopColor: CONFIG.borderColor,
   },
 
   tabBarContent: {
@@ -344,7 +286,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: CONFIG.containerPaddingHorizontal,
-    backgroundColor: Platform.OS === 'ios' ? 'transparent' : undefined,
+    backgroundColor: CONFIG.background,
   },
 
   tabItem: {
@@ -353,20 +295,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: '100%',
     position: 'relative',
-  },
-
-  activePill: {
-    position: 'absolute',
-    width: CONFIG.activePillWidth,
-    height: CONFIG.activePillHeight,
-    backgroundColor: CONFIG.activePillBackground,
-    borderRadius: CONFIG.activePillRadius,
-    // Active pill shadow
-    shadowColor: CONFIG.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: CONFIG.activePillShadowOpacity,
-    shadowRadius: CONFIG.activePillShadowRadius,
-    elevation: 4,
   },
 
   iconContainer: {

@@ -1,20 +1,19 @@
 import { Pressable, Text, ActivityIndicator, View, PressableProps } from 'react-native';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// BETTER COACHING DESIGN SYSTEM - NEUTRAL BASE WITH SAGE ACCENT
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
-  sage: '#6F8F79',        // CTA start (spec)
-  sageDark: '#4F6F5A',    // CTA end (spec)
-  sageLight: '#DCE9DF',   // Sage pastel (spec)
-  lavender: '#E7E0F3',    // Lavender pastel (spec)
-  lavenderDark: '#8A7A9E',
-  error: '#CF3A3A',
-  errorDark: '#AD2E2E',
-  textPrimary: '#111827', // Spec primary text
-  border: '#E7E7E7',      // Spec border
-  surface: '#F7F6F3',     // Spec background
+  primary: '#4A7C59',
+  primaryDark: '#3D6649',
+  primaryLight: '#E8F0EB',
+  error: '#DC2626',
+  errorDark: '#B91C1C',
+  textPrimary: '#111827',
+  border: '#E5E7EB',
+  surface: '#FFFFFF',
+  surfaceSecondary: '#F3F4F6',
 };
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
@@ -39,23 +38,24 @@ const variantStyles: Record<ButtonVariant, {
   border?: string;
 }> = {
   primary: {
-    bg: colors.sage,
-    bgPressed: colors.sageDark,
+    bg: colors.primary,
+    bgPressed: colors.primaryDark,
     text: 'white',
   },
   secondary: {
-    bg: colors.lavender,
-    bgPressed: colors.lavenderDark,
-    text: 'white',
+    bg: colors.surface,
+    bgPressed: colors.surfaceSecondary,
+    text: colors.primary,
+    border: colors.primary,
   },
   ghost: {
     bg: 'transparent',
-    bgPressed: colors.sageLight,
-    text: colors.sageDark,
+    bgPressed: colors.primaryLight,
+    text: colors.primary,
   },
   outline: {
-    bg: 'transparent',
-    bgPressed: colors.surface,
+    bg: colors.surface,
+    bgPressed: colors.surfaceSecondary,
     text: colors.textPrimary,
     border: colors.border,
   },
@@ -76,21 +76,21 @@ const sizeStyles: Record<ButtonSize, {
   sm: {
     height: 36,
     paddingHorizontal: 14,
-    borderRadius: 14,    // Updated
+    borderRadius: 10,
     fontSize: 13,
     iconSize: 16,
   },
   md: {
     height: 48,
     paddingHorizontal: 20,
-    borderRadius: 20,    // Spec: 18-20px
+    borderRadius: 10,
     fontSize: 15,
     iconSize: 20,
   },
   lg: {
     height: 56,
     paddingHorizontal: 28,
-    borderRadius: 22,    // Spec: larger buttons use card radius
+    borderRadius: 10,
     fontSize: 16,
     iconSize: 24,
   },
@@ -136,12 +136,12 @@ export function Button({
         borderWidth: variantStyle.border ? 1 : 0,
         borderColor: variantStyle.border,
         opacity: isDisabled ? 0.5 : 1,
-        // Spec shadow: 0 6px 16px rgba(17,24,39,0.08)
-        shadowColor: 'rgb(17, 24, 39)',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: variant === 'primary' || variant === 'secondary' ? 0.08 : 0,
-        shadowRadius: 16,
-        elevation: variant === 'primary' || variant === 'secondary' ? 3 : 0,
+        // Subtle shadow for primary buttons only
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: variant === 'primary' ? 0.06 : 0,
+        shadowRadius: 2,
+        elevation: variant === 'primary' ? 1 : 0,
       })}
       {...props}
     >

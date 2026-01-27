@@ -95,9 +95,9 @@ export function SearchBar({
           className,
         ].filter(Boolean).join(' ')}
         style={{
-          backgroundColor: colors.surface,
+          backgroundColor: colors.surfaceSecondary,
           borderColor: colors.border,
-          borderRadius: 20, // Spec: input radius 18-20px
+          borderRadius: 10,
         }}
       >
         <SearchIcon size={18} color={colors.textTertiary} />
@@ -118,9 +118,9 @@ export function SearchBar({
         className,
       ].filter(Boolean).join(' ')}
       style={{
-        backgroundColor: colors.surface,
+        backgroundColor: colors.surfaceSecondary,
         borderColor: isFocused ? colors.borderFocus : colors.border,
-        borderRadius: 20, // Spec: input radius 18-20px
+        borderRadius: 10,
       }}
     >
       <SearchIcon size={18} color={colors.textTertiary} />

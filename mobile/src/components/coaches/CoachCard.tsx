@@ -140,11 +140,19 @@ export function CoachCard({
       <Pressable
         onPress={handlePress}
         className={[
-          'rounded-card w-40 mr-3 shadow-card border overflow-hidden',
+          'w-40 mr-3 border overflow-hidden',
           'active:opacity-90 active:scale-98',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+        }}
       >
         <View className="p-4">
           {/* Avatar */}
@@ -195,11 +203,19 @@ export function CoachCard({
       <Pressable
         onPress={handlePress}
         className={[
-          'rounded-card shadow-card border mb-3 overflow-hidden',
+          'border mb-3 overflow-hidden',
           'active:opacity-90',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderRadius: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+        }}
       >
         <View className="p-4 flex-row">
           {/* Avatar */}
@@ -290,14 +306,13 @@ export function CoachCard({
           backgroundColor: colors.surface,
           borderWidth: 1,
           borderColor: colors.border,
-          borderRadius: 22, // Spec card radius
+          borderRadius: 12,
           flex: 1,
-          // Spec card shadow: 0 10px 28px rgba(17,24,39,0.06)
-          shadowColor: 'rgb(17, 24, 39)',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.06,
-          shadowRadius: 28,
-          elevation: 4,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+          elevation: 2,
         }}
       >
         <View className="p-3.5">
@@ -397,7 +412,7 @@ export function CoachCard({
           <Pressable
             onPress={handlePress}
             className="py-1.5 items-center active:opacity-80"
-            style={{ backgroundColor: colors.primary, borderRadius: 14 }}
+            style={{ backgroundColor: colors.primary, borderRadius: 10 }}
           >
             <Text
               className="text-body-sm font-inter-medium"
@@ -422,11 +437,19 @@ export function CoachCard({
     <Pressable
       onPress={handlePress}
       className={[
-        'rounded-card shadow-card border mb-3 overflow-hidden',
+        'border mb-3 overflow-hidden',
         'active:opacity-90',
         className,
       ].filter(Boolean).join(' ')}
-      style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: colors.border,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
+      }}
     >
       <View className="p-4">
         {/* Header row with avatar, name, and price */}

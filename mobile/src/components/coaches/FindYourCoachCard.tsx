@@ -21,11 +21,16 @@ export function FindYourCoachCard() {
 
   return (
     <View
-      className="mx-5 rounded-2xl p-4 mb-6"
+      className="mx-5 p-4 mb-6"
       style={{
         backgroundColor: colors.surfaceSecondary,
         borderWidth: 1,
         borderColor: colors.border,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
       }}
     >
       {/* Title and subtitle */}
@@ -47,8 +52,11 @@ export function FindYourCoachCard() {
         {/* Get matched button */}
         <Pressable
           onPress={() => router.push('/quiz')}
-          className="px-4 py-1.5 rounded-full active:opacity-80 mr-3"
-          style={{ backgroundColor: colors.primary }}
+          className="px-4 py-1.5 active:opacity-80 mr-3"
+          style={{
+            backgroundColor: colors.primary,
+            borderRadius: 10,
+          }}
         >
           <Text className="text-body-sm font-inter-semibold text-white">
             Get matched
