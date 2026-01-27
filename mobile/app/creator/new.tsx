@@ -1,0 +1,250 @@
+import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useRouter, Stack } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCreatorStore } from '../../src/stores/creator';
+import { useAuthStore } from '../../src/stores/auth';
+import { StepIndicator } from '../../src/components/creator/StepIndicator';
+import { Step1Identity } from '../../src/components/creator/Step1Identity';
+import { Step2Personality } from '../../src/components/creator/Step2Personality';
+import { Step3Expertise } from '../../src/components/creator/Step3Expertise';
+import { Step4Model } from '../../src/components/creator/Step4Model';
+import { Step5Preview } from '../../src/components/creator/Step5Preview';
+
+export default function NewCoachScreen() {
+  const router = useRouter();
+  const { isPremium } = useAuthStore();
+  const {
+    draft,
+    currentStep,
+    totalSteps,
+    isSaving,
+    isPublishing,
+    nextStep,
+    prevStep,
+    setStep,
+    saveDraft,
+    publishAgent,
+    resetDraft,
+  } = useCreatorStore();
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Reset draft when mounting
+  useEffect(() => {
+    resetDraft();
+  }, []);
+
+  // Track changes
+  useEffect(() => {
+    if (draft.name || draft.tagline || draft.category) {
+      setHasUnsavedChanges(true);
+    }
+  }, [draft]);
+
+  // Check premium access
+  useEffect(() => {
+    if (!isPremium) {
+      Alert.alert(
+        'Premium Required',
+        'You need a premium subscription to create coaches.',
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    }
+  }, [isPremium]);
+
+  // Validation for each step
+  const canProceed = (): boolean => {
+    switch (currentStep) {
+      case 1:
+        return !!draft.name && !!draft.tagline && !!draft.category;
+      case 2:
+        return true; // Personality has defaults
+      case 3:
+        return true; // Expertise is optional
+      case 4:
+        return !!draft.greetingMessage && !!draft.modelConfig.model;
+      case 5:
+        return true; // Preview step
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (!canProceed()) {
+      Alert.alert('Missing Fields', 'Please fill in all required fields before continuing.');
+      return;
+    }
+    nextStep();
+  };
+
+  const handleSaveDraft = async () => {
+    try {
+      await saveDraft();
+      setHasUnsavedChanges(false);
+      Alert.alert('Saved!', 'Your coach has been saved as a draft.');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to save draft');
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!canProceed()) {
+      Alert.alert('Missing Fields', 'Please complete all required fields before publishing.');
+      return;
+    }
+
+    Alert.alert(
+      'Publish Coach',
+      `Are you sure you want to publish "${draft.name}"? It will be visible to all users.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Publish',
+          onPress: async () => {
+            try {
+              await publishAgent();
+              Alert.alert('Published!', 'Your coach is now live and available to users.', [
+                {
+                  text: 'View My Coaches',
+                  onPress: () => router.replace('/create'),
+                },
+              ]);
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Failed to publish coach');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      prevStep();
+    } else if (hasUnsavedChanges) {
+      Alert.alert('Unsaved Changes', 'You have unsaved changes. Do you want to save as draft?', [
+        { text: 'Discard', style: 'destructive', onPress: () => router.back() },
+        { text: 'Save Draft', onPress: () => handleSaveDraft().then(() => router.back()) },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    } else {
+      router.back();
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <Step1Identity />;
+      case 2:
+        return <Step2Personality />;
+      case 3:
+        return <Step3Expertise />;
+      case 4:
+        return <Step4Model />;
+      case 5:
+        return <Step5Preview />;
+      default:
+        return null;
+    }
+  };
+
+  const getStepTitle = () => {
+    const titles = ['Identity', 'Personality', 'Expertise', 'Model & Settings', 'Preview & Test'];
+    return titles[currentStep - 1];
+  };
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: 'Create Coach',
+          headerBackTitle: 'Cancel',
+          headerLeft: () => (
+            <TouchableOpacity onPress={handleBack} className="mr-4">
+              <Text className="text-primary-600 text-base">
+                {currentStep > 1 ? '← Back' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={handleSaveDraft} disabled={isSaving}>
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#4F46E5" />
+              ) : (
+                <Text className="text-primary-600 text-base">Save</Text>
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <SafeAreaView className="flex-1 bg-background-light" edges={['bottom']}>
+        {/* Step Indicator */}
+        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+
+        {/* Step Title */}
+        <View className="px-5 pb-2">
+          <Text className="text-xl font-bold text-gray-900">
+            Step {currentStep}: {getStepTitle()}
+          </Text>
+        </View>
+
+        {/* Step Content */}
+        <View className="flex-1">{renderStep()}</View>
+
+        {/* Bottom Actions */}
+        <View className="bg-white border-t border-gray-100 px-5 py-4">
+          {currentStep < totalSteps ? (
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={!canProceed()}
+              className={`py-4 rounded-xl items-center ${
+                canProceed() ? 'bg-primary-600' : 'bg-gray-200'
+              }`}
+            >
+              <Text
+                className={`font-semibold text-base ${
+                  canProceed() ? 'text-white' : 'text-gray-500'
+                }`}
+              >
+                Continue
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View className="flex-row">
+              <TouchableOpacity
+                onPress={handleSaveDraft}
+                disabled={isSaving}
+                className="flex-1 py-4 rounded-xl items-center bg-gray-100 mr-2"
+              >
+                <Text className="font-semibold text-gray-700">Save Draft</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handlePublish}
+                disabled={isPublishing}
+                className="flex-1 py-4 rounded-xl items-center bg-primary-600 ml-2"
+              >
+                {isPublishing ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="font-semibold text-white">Publish</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Progress hint */}
+          {currentStep < totalSteps && (
+            <Text className="text-xs text-gray-400 text-center mt-2">
+              {!canProceed() && '* Fill required fields to continue'}
+            </Text>
+          )}
+        </View>
+      </SafeAreaView>
+    </>
+  );
+}

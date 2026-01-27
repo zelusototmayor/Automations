@@ -1,0 +1,235 @@
+# Better Coaching UI Revamp - Progress Log
+
+## Codebase Patterns
+
+- Tailwind config is JavaScript (not TS), uses `module.exports`
+- NativeWind preset required: `presets: [require("nativewind/preset")]`
+- Pre-existing TypeScript errors in codebase (type mismatches in auth store, profile screen)
+- Color tokens use standard Tailwind scale (50-950)
+
+---
+
+## Iteration Log
+
+---
+## 2026-01-20 - US-001: Create new color system in Tailwind config
+
+**Files changed:**
+- mobile/tailwind.config.js
+- mobile/package.json (added typecheck script)
+
+**Implementation notes:**
+- Updated primary color from indigo (#4F46E5) to trust-blue (#2563EB)
+- Added complete semantic color palettes: success (green), error (red), warning (amber), neutral (gray)
+- Added semantic aliases: text.primary/secondary/muted, border.DEFAULT/light/dark, background.card/muted
+- Added typography fontSize tokens: hero, display, h1-h4, body, body-sm, caption
+- Added custom borderRadius tokens: card (12px), button (8px), chip (20px), avatar (9999px)
+- Added custom boxShadow tokens: card, card-hover, button
+- Added spacing tokens: section (24px), card-padding (16px)
+
+**Learnings for future iterations:**
+- Tailwind config can include fontSize with lineHeight and fontWeight in array format
+- Pre-existing TS errors should be tracked but don't block color system changes
+- The color scale 50-950 provides more granularity than 50-900
+
+---
+
+## 2026-01-20 - US-002: Implement typography system with custom fonts
+
+**Files changed:**
+- mobile/app/_layout.tsx (font loading, splash screen)
+- mobile/tailwind.config.js (fontFamily tokens)
+- mobile/src/components/ui/Text.tsx (NEW - Typography component)
+- mobile/src/components/ui/index.ts (NEW - exports)
+- mobile/package.json (added @expo-google-fonts/inter, expo-splash-screen)
+
+**Implementation notes:**
+- Installed @expo-google-fonts/inter with 4 weights: Regular (400), Medium (500), SemiBold (600), Bold (700)
+- Updated _layout.tsx to load fonts using useFonts hook
+- Added SplashScreen handling to prevent flash of unstyled text
+- Created reusable Text component with variant system (hero, display, h1-h4, body, body-sm, caption)
+- Used Inter for headings as well (Satoshi not available in Expo Google Fonts)
+- Font family tokens added to tailwind: inter-regular, inter-medium, inter-semibold, inter-bold
+
+**Learnings for future iterations:**
+- expo-font is bundled with expo, but @expo-google-fonts/* packages need explicit install
+- SplashScreen.preventAutoHideAsync() must be called at module level
+- NativeWind className prop works with RNText component
+- useFonts returns [fontsLoaded, error] - check fontsLoaded before rendering
+
+---
+
+## 2026-01-20 - US-003: Create spacing and layout foundation
+
+**Files changed:**
+- (Already completed as part of US-001)
+
+**Implementation notes:**
+- Spacing tokens added in US-001: section (24px), card-padding (16px)
+- Tailwind's default 8px base unit (space-1 = 0.25rem = 4px, space-2 = 8px, etc.) already in place
+- SafeAreaProvider was already configured in _layout.tsx
+- Gap utilities (gap-*, gap-x-*, gap-y-*) standard in NativeWind
+
+**Learnings for future iterations:**
+- Tailwind's default spacing scale is 4px-based, can add semantic tokens via theme.extend.spacing
+- NativeWind supports gap utilities for flexbox layouts
+- React Native uses SafeAreaProvider + SafeAreaView for notch handling
+
+---
+
+## 2026-01-20 - US-004: Create reusable Button component system
+
+**Files changed:**
+- mobile/src/components/ui/Button.tsx (NEW)
+- mobile/src/components/ui/index.ts (updated exports)
+
+**Implementation notes:**
+- Created Button component with 5 variants: primary, secondary, ghost, outline, danger
+- 3 sizes: sm (32px), md (44px touch-friendly), lg (52px)
+- Loading state with ActivityIndicator, disabled state with opacity
+- Support for leftIcon and rightIcon
+- fullWidth prop for full-width buttons
+- Convenience exports: PrimaryButton, SecondaryButton, etc.
+
+**Learnings for future iterations:**
+- React Native Pressable supports render props for pressed state
+- ActivityIndicator color needs explicit hex values
+- Touch targets should be minimum 44px for accessibility
+
+---
+
+## 2026-01-20 - US-005: Create trust badge and rating components
+
+**Files changed:**
+- mobile/src/components/ui/Badge.tsx (NEW)
+- mobile/src/components/ui/Rating.tsx (NEW)
+- mobile/src/components/ui/index.ts (updated exports)
+
+**Implementation notes:**
+- Badge.tsx: Generic Badge, TierBadge (FREE/PREMIUM/CREATOR), VerifiedBadge
+- Rating.tsx: StarRating (with stars, rating number, review count), SessionCount, ResponseTime
+- All components support size variants (sm, md)
+- Used design system colors consistently
+
+**Learnings for future iterations:**
+- Unicode stars (★) work well for ratings in React Native
+- Break down components into granular pieces for reusability
+- Consider both card and detail page contexts when designing components
+
+---
+
+## 2026-01-20 - US-006: Redesign CoachCard component
+
+**Files changed:**
+- mobile/src/components/coaches/CoachCard.tsx (NEW)
+- mobile/src/components/coaches/index.ts (NEW)
+- mobile/src/types/index.ts (added trust signal fields to Agent type)
+
+**Implementation notes:**
+- Created CoachCard with 3 variants: default, compact, horizontal
+- Uses all UI components: StarRating, TierBadge, VerifiedBadge, SessionCount, Badge
+- Compact variant for horizontal scroll (w-40)
+- Default variant for list views
+- Horizontal variant for wide cards
+- Added is_verified, session_count, response_time_minutes to Agent type
+- Press animation with active:opacity-90
+
+**Learnings for future iterations:**
+- Multiple card variants handle different layout contexts
+- Optional chaining (?.) important for type safety with optional fields
+- Pressable with active: classes provides good tactile feedback
+
+---
+
+## 2026-01-20 - US-007: CategoryChip and filter components
+
+**Files changed:**
+- mobile/src/components/ui/CategoryChip.tsx (NEW)
+- mobile/src/components/ui/index.ts (updated exports)
+
+**Implementation notes:**
+- Created CategoryChip with selected/unselected states using primary-600 and white
+- CategoryChipList for horizontal scrolling filter chips with "All" option first
+- CategoryCard for category grids on home screen
+- 36px consistent height for chips
+
+---
+## 2026-01-20 - US-008: SearchBar component
+
+**Files changed:**
+- mobile/src/components/ui/SearchBar.tsx (NEW)
+- mobile/src/components/ui/index.ts (updated exports)
+
+**Implementation notes:**
+- Debounced search input (default 300ms, configurable)
+- Search icon on left, clear button on right
+- 44px height (h-11) for touch targets
+- Editable and non-editable variants
+- Non-editable version for navigation triggers
+
+---
+## 2026-01-20 - US-009 to US-011: Core screens redesign
+
+**Files changed:**
+- mobile/app/(tabs)/index.tsx (Home screen)
+- mobile/app/(tabs)/explore.tsx (Explore screen)
+- mobile/app/coach/[id].tsx (Coach Detail screen)
+
+**Implementation notes:**
+- Home: Hero section with greeting, non-editable SearchBar, Featured Coaches horizontal scroll, CategoryCard grid
+- Explore: Functional SearchBar, CategoryChipList filters, results count, empty state, CoachCards
+- Coach Detail: Large avatar, trust signals row, About card, Expertise tags, Try Asking starters, Stats section, sticky CTA
+
+---
+## 2026-01-20 - US-012 to US-014: Secondary screens redesign
+
+**Files changed:**
+- mobile/app/chat/[agentId].tsx (Chat screen)
+- mobile/app/(tabs)/profile.tsx (Profile screen)
+- mobile/app/paywall.tsx (Paywall screen)
+
+**Implementation notes:**
+- Chat: User messages (primary bg), assistant messages (neutral bg), streaming indicator, suggestion chips
+- Profile: Large avatar, TierBadge, MenuItem components, grouped sections, danger sign-out, auth gate
+- Paywall: Feature list, Monthly/Annual cards, "Save 33%" badge, secure payment note
+
+---
+## 2026-01-20 - US-015: Tab Bar update
+
+**Files changed:**
+- mobile/app/(tabs)/_layout.tsx
+
+**Implementation notes:**
+- Updated colors to primary (#2563EB) active, muted gray inactive
+- Inter_500Medium for labels
+- Refined icon sizing with scale transform on active
+- Removed shadow for cleaner look
+
+---
+## 2026-01-20 - US-016: Micro-interactions and polish
+
+**Files changed:**
+- mobile/src/utils/animations.ts (NEW)
+- mobile/src/components/ui/AnimatedPressable.tsx (NEW)
+- mobile/src/components/ui/Skeleton.tsx (NEW)
+- mobile/src/components/ui/index.ts (updated exports)
+
+**Implementation notes:**
+- Created animation utilities with timing/easing configs
+- AnimatedPressable component with spring scale animation
+- Skeleton and SkeletonCard components with pulsing opacity animation
+- All interactive elements have press feedback
+
+---
+## 2026-01-20 - US-017: Final QA
+
+**Implementation notes:**
+- Fixed TypeScript errors in new components (setTimeout type, DimensionValue type)
+- Pre-existing errors in auth.ts and context.tsx remain (type mismatches unrelated to UI)
+- All new components use design system colors and typography
+- Created comprehensive UI component exports in index.ts
+
+**Summary:**
+All 17 user stories completed. UI revamp ready for testing.
+
+---

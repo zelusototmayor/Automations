@@ -1,0 +1,41 @@
+:root {
+  /* Better Coaching Brand Colors - Trust Blue */
+  --color-primary: #2563EB;
+  --color-primary-light: #3B82F6;
+  --color-primary-dark: #1D4ED8;
+  --color-primary-foreground: #FFFFFF;
+
+  /* Secondary - Warm Amber */
+  --color-secondary: #FEF3C7;
+  --color-secondary-foreground: #92400E;
+
+  /* Surface Colors */
+  --color-surface: #FAFAFA;
+  --color-surface-foreground: #18181B;
+
+  /* Muted */
+  --color-muted: #F4F4F5;
+  --color-muted-foreground: #71717A;
+
+  /* Accent */
+  --color-accent: #F59E0B;
+  --color-accent-foreground: #FFFFFF;
+
+  /* Border */
+  --color-border: #E4E4E7;
+
+  /* Success/Error */
+  --color-success: #16A34A;
+  --color-error: #DC2626;
+
+  /* Typography - Inter */
+  --font-family-display: Arial, Helvetica, sans-serif;
+  --font-family-content: Arial, Helvetica, sans-serif;
+  --font-weight-display: 600;
+  --font-weight-content: 400;
+
+  /* Spacing */
+  --radius: 12px;
+  --radius-button: 8px;
+  --radius-chip: 20px;
+}

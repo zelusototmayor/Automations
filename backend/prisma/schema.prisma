@@ -1,0 +1,354 @@
+// Prisma Schema for CoachCraft
+// AI Coaching Marketplace
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String?
+  avatarUrl     String?   @map("avatar_url")
+
+  // Personal context for coaching
+  context       Json?     @default("{}")
+
+  // Subscription info
+  subscriptionTier   SubscriptionTier @default(FREE) @map("subscription_tier")
+  subscriptionExpiry DateTime?        @map("subscription_expiry")
+  revenuecatId       String?          @unique @map("revenuecat_id")
+
+  // Timestamps
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  agents        Agent[]         @relation("CreatedAgents")
+  conversations Conversation[]
+  ratings       AgentRating[]
+  refreshTokens RefreshToken[]
+  integrations  IntegrationConnection[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+  CREATOR
+}
+
+// ============================================
+// AGENTS (COACHES)
+// ============================================
+
+model Agent {
+  id          String   @id @default(uuid())
+  creatorId   String   @map("creator_id")
+
+  // Basic info
+  name        String
+  tagline     String?
+  description String?
+  avatarUrl   String?  @map("avatar_url")
+  category    String
+  tags        String[] @default([])
+  tier        AgentTier @default(PREMIUM)
+
+  // AI Configuration
+  systemPrompt         String   @map("system_prompt")
+  greetingMessage      String   @map("greeting_message")
+  personalityConfig    Json     @default("{}") @map("personality_config")
+  modelConfig          Json     @map("model_config")
+  exampleConversations Json[]   @default([]) @map("example_conversations")
+  conversationStarters String[] @default([]) @map("conversation_starters")
+
+  // Inline knowledge context (simplified - no OAuth required)
+  // Stores extracted text from Notion public pages and uploaded documents
+  knowledgeContext     Json     @default("[]") @map("knowledge_context")
+
+  // Stats
+  usageCount  Int      @default(0) @map("usage_count")
+  ratingAvg   Float?   @map("rating_avg")
+  ratingCount Int      @default(0) @map("rating_count")
+
+  // Status
+  isPublished Boolean  @default(false) @map("is_published")
+
+  // Timestamps
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator       User           @relation("CreatedAgents", fields: [creatorId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  ratings       AgentRating[]
+  freeTrials    FreeTrial[]
+  knowledgeSources KnowledgeSource[]
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([creatorId])
+  @@map("agents")
+}
+
+enum AgentTier {
+  FREE
+  PREMIUM
+}
+
+// ============================================
+// CONVERSATIONS & MESSAGES
+// ============================================
+
+model Conversation {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  agentId   String   @map("agent_id")
+  title     String?
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent    Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([userId])
+  @@index([agentId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String   @map("conversation_id")
+  role           MessageRole
+  content        String
+
+  // Token tracking for billing
+  tokenCount     Int?     @map("token_count")
+
+  // Timestamps
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ============================================
+// RATINGS & REVIEWS
+// ============================================
+
+model AgentRating {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  agentId   String   @map("agent_id")
+  rating    Int      // 1-5
+  review    String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, agentId])
+  @@map("agent_ratings")
+}
+
+// ============================================
+// FREE TRIAL TRACKING
+// ============================================
+
+model FreeTrial {
+  id        String   @id @default(uuid())
+  visitorId String   @map("visitor_id") // Can be anonymous user or user ID
+  agentId   String   @map("agent_id")
+  usedAt    DateTime @default(now()) @map("used_at")
+
+  // Relations
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([visitorId, agentId])
+  @@index([visitorId])
+  @@map("free_trials")
+}
+
+// ============================================
+// CATEGORIES (for reference/seeding)
+// ============================================
+
+model Category {
+  id    String @id
+  name  String
+  emoji String
+
+  @@map("categories")
+}
+
+// ============================================
+// KNOWLEDGE SOURCES (RAG)
+// ============================================
+
+// OAuth connections to external services (Notion, Google)
+model IntegrationConnection {
+  id              String              @id @default(uuid())
+  userId          String              @map("user_id")
+  provider        IntegrationProvider
+  accessToken     String              @map("access_token") // Encrypted
+  refreshToken    String?             @map("refresh_token")
+  tokenExpiresAt  DateTime?           @map("token_expires_at")
+  status          ConnectionStatus    @default(ACTIVE)
+  metadata        Json?               @default("{}") // Provider-specific metadata
+
+  // Timestamps
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  // Relations
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  knowledgeSources KnowledgeSource[]
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("integration_connections")
+}
+
+enum IntegrationProvider {
+  NOTION
+  GOOGLE_DOCS
+}
+
+enum ConnectionStatus {
+  ACTIVE
+  EXPIRED
+  ERROR
+}
+
+// Knowledge source linked to an agent
+model KnowledgeSource {
+  id              String           @id @default(uuid())
+  agentId         String           @map("agent_id")
+  connectionId    String           @map("connection_id")
+  name            String
+  externalId      String           @map("external_id") // Notion page ID or Google Doc ID
+  sourceType      SourceType       @map("source_type")
+  syncEnabled     Boolean          @default(true) @map("sync_enabled")
+  lastSyncAt      DateTime?        @map("last_sync_at")
+  lastSyncStatus  SyncStatus?      @map("last_sync_status")
+  lastSyncError   String?          @map("last_sync_error")
+  documentCount   Int              @default(0) @map("document_count")
+  chunkCount      Int              @default(0) @map("chunk_count")
+
+  // Timestamps
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  agent           Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  connection      IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  documents       KnowledgeDocument[]
+
+  @@index([agentId])
+  @@index([connectionId])
+  @@map("knowledge_sources")
+}
+
+enum SourceType {
+  NOTION_PAGE
+  NOTION_DATABASE
+  GOOGLE_DOC
+  GOOGLE_DRIVE_FOLDER
+}
+
+enum SyncStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Individual documents within a source
+model KnowledgeDocument {
+  id              String           @id @default(uuid())
+  sourceId        String           @map("source_id")
+  externalId      String           @map("external_id")
+  title           String
+  url             String?
+  contentHash     String?          @map("content_hash") // For change detection
+  status          DocumentStatus   @default(PENDING)
+  errorMessage    String?          @map("error_message")
+
+  // Timestamps
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  source          KnowledgeSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  chunks          KnowledgeChunk[]
+
+  @@index([sourceId])
+  @@index([externalId])
+  @@map("knowledge_documents")
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Text chunks with vector embeddings
+model KnowledgeChunk {
+  id              String           @id @default(uuid())
+  documentId      String           @map("document_id")
+  content         String
+  chunkIndex      Int              @map("chunk_index")
+  heading         String?          // Parent heading for context
+  tokenCount      Int              @default(0) @map("token_count")
+  embedding       Unsupported("vector(1536)")?
+
+  // Timestamps
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  document        KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("knowledge_chunks")
+}

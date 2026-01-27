@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Screen</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body class="row bg-surface" style="width: 960px; height: 540px; padding: 32px 40px; gap: 40px;">
+  <!-- Left: Description -->
+  <div class="col" style="width: 35%;">
+    <h1 style="font-size: 32px; font-weight: 700; color: #18181B; margin: 0 0 8px 0;">Chat Screen</h1>
+    <p style="font-size: 16px; color: #71717A; margin: 0 0 24px 0;">Core interaction experience</p>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 12px; padding: 16px;">
+      <p style="font-size: 13px; font-weight: 600; color: #52525B; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">Message Design</p>
+
+      <div style="margin-bottom: 12px;">
+        <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">💬 User Messages</p>
+        <p style="font-size: 12px; color: #71717A; margin: 2px 0 0 0;">Primary blue bg, white text, right-aligned</p>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">🤖 Assistant Messages</p>
+        <p style="font-size: 12px; color: #71717A; margin: 2px 0 0 0;">Neutral bg, dark text, left-aligned</p>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">⏳ Typing Indicator</p>
+        <p style="font-size: 12px; color: #71717A; margin: 2px 0 0 0;">Animated dots during streaming</p>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">💡 Suggestion Chips</p>
+        <p style="font-size: 12px; color: #71717A; margin: 2px 0 0 0;">Quick prompts to continue conversation</p>
+      </div>
+
+      <div>
+        <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">📝 Input Area</p>
+        <p style="font-size: 12px; color: #71717A; margin: 2px 0 0 0;">Clean design with send button</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Phone Mockup -->
+  <div class="col center fill-width">
+    <!-- Phone Frame -->
+    <div style="width: 280px; background: #FFFFFF; border-radius: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); overflow: hidden; border: 8px solid #18181B;">
+      <!-- Header -->
+      <div style="height: 56px; background: #FFFFFF; border-bottom: 1px solid #E4E4E7; padding: 0 12px; display: flex; align-items: center; gap: 12px;">
+        <p style="font-size: 14px; color: #18181B; margin: 0;">←</p>
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #10B981, #14B8A6); border-radius: 8px;"></div>
+        <div style="flex: 1;">
+          <p style="font-size: 14px; font-weight: 600; color: #18181B; margin: 0;">Zen Master</p>
+          <p style="font-size: 10px; color: #16A34A; margin: 0;">Online</p>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div style="background: #FAFAFA; padding: 12px; height: 300px; display: flex; flex-direction: column; gap: 12px;">
+        <!-- Assistant Message -->
+        <div style="display: flex; align-items: flex-start; gap: 8px; max-width: 85%;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #10B981, #14B8A6); border-radius: 6px; flex-shrink: 0;"></div>
+          <div style="background: #F4F4F5; border-radius: 12px; border-top-left-radius: 4px; padding: 10px 12px;">
+            <p style="font-size: 13px; color: #18181B; margin: 0; line-height: 1.4;">Hello! I'm Zen Master. I'm here to help you find peace and clarity. What brings you here today?</p>
+            <p style="font-size: 9px; color: #A1A1AA; margin: 6px 0 0 0;">9:41 AM</p>
+          </div>
+        </div>
+
+        <!-- User Message -->
+        <div style="display: flex; justify-content: flex-end;">
+          <div style="background: #2563EB; border-radius: 12px; border-top-right-radius: 4px; padding: 10px 12px; max-width: 75%;">
+            <p style="font-size: 13px; color: #FFFFFF; margin: 0; line-height: 1.4;">I've been feeling stressed lately and want to learn meditation</p>
+            <p style="font-size: 9px; color: rgba(255,255,255,0.7); margin: 6px 0 0 0;">9:42 AM</p>
+          </div>
+        </div>
+
+        <!-- Assistant Response -->
+        <div style="display: flex; align-items: flex-start; gap: 8px; max-width: 85%;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #10B981, #14B8A6); border-radius: 6px; flex-shrink: 0;"></div>
+          <div style="background: #F4F4F5; border-radius: 12px; border-top-left-radius: 4px; padding: 10px 12px;">
+            <p style="font-size: 13px; color: #18181B; margin: 0; line-height: 1.4;">I understand. Stress is something many of us face. Let's start with a simple breathing exercise...</p>
+            <p style="font-size: 9px; color: #A1A1AA; margin: 6px 0 0 0;">9:42 AM</p>
+          </div>
+        </div>
+
+        <!-- Suggestion Chips -->
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto;">
+          <div style="background: #FFFFFF; border: 1px solid #2563EB; border-radius: 16px; padding: 6px 10px;">
+            <p style="font-size: 11px; color: #2563EB; margin: 0;">Tell me more</p>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #2563EB; border-radius: 16px; padding: 6px 10px;">
+            <p style="font-size: 11px; color: #2563EB; margin: 0;">Start exercise</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div style="padding: 12px; background: #FFFFFF; border-top: 1px solid #E4E4E7; display: flex; gap: 8px; align-items: center;">
+        <div style="flex: 1; background: #F4F4F5; border-radius: 20px; padding: 10px 14px;">
+          <p style="font-size: 13px; color: #A1A1AA; margin: 0;">Type a message...</p>
+        </div>
+        <div style="width: 36px; height: 36px; background: #2563EB; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <p style="font-size: 14px; color: #FFFFFF; margin: 0;">↑</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
