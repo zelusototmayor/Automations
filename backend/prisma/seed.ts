@@ -73,7 +73,7 @@ Always end with a specific action item or question to keep the conversation movi
       },
       modelConfig: {
         provider: 'anthropic',
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         temperature: 0.7,
       },
       conversationStarters: [
@@ -116,7 +116,7 @@ Remember to breathe and create space in your responses. You're not in a rush.`,
       },
       modelConfig: {
         provider: 'anthropic',
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         temperature: 0.8,
       },
       conversationStarters: [
@@ -202,7 +202,7 @@ Feel free to use metaphors, ask unexpected questions, and make creativity feel f
       },
       modelConfig: {
         provider: 'anthropic',
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         temperature: 0.9,
       },
       conversationStarters: [
