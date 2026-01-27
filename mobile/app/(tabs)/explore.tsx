@@ -12,13 +12,13 @@ import { SearchBar, CategoryChipList } from '../../src/components/ui';
 import { SearchIcon } from '../../src/components/ui/Icons';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// UI DESIGN SPEC V2 - SHARPER AESTHETIC
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
   sage: '#6F8F79',          // CTA start (spec)
   sageLight: '#DCE9DF',     // Sage pastel (spec)
-  surface: '#F7F6F3',       // Spec background
+  surface: '#F5F5F7',       // V2: Cool gray background
   textPrimary: '#111827',   // Spec primary text
   textSecondary: '#6B7280', // Spec secondary text
   textMuted: '#9CA3AF',     // Spec muted text

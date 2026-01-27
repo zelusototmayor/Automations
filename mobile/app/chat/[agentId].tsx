@@ -25,7 +25,7 @@ import { StarRating, SessionCount } from '../../src/components/ui/Rating';
 import type { Message, Agent } from '../../src/types';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// UI DESIGN SPEC V2 - SHARPER AESTHETIC
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
@@ -34,12 +34,12 @@ const colors = {
   sageLight: '#DCE9DF',
   lavender: '#E7E0F3',
   lavenderDark: '#8A7A9E',
-  surface: '#F7F6F3',
+  surface: '#F5F5F7',          // V2: Cool gray background
   warmWhite: 'rgba(255,255,255,0.95)',
   textPrimary: '#111827',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  border: '#E7E7E7',
+  border: '#D1D5DB',           // V2: Darker border
 };
 
 // Avatar gradient colors

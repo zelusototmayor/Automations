@@ -45,7 +45,17 @@ function ConversationCard({
     <TouchableOpacity
       onPress={() => router.push(`/chat/${conversation.agent_id}?conversationId=${conversation.id}`)}
       onLongPress={handleLongPress}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 mx-5"
+      className="rounded-2xl mb-3 mx-5"
+      style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.92)',
+        borderWidth: 1.5,
+        borderColor: '#D1D5DB',
+        shadowColor: '#111827',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 4,
+      }}
     >
       <View className="p-4 flex-row">
         <View className="bg-primary-100 rounded-xl w-12 h-12 items-center justify-center mr-3">

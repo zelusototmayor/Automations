@@ -123,17 +123,17 @@ module.exports = {
           DEFAULT: '#F5F0E8',
         },
 
-        // Surface colors for backgrounds (spec)
+        // Surface colors for backgrounds (V2: Cool gray)
         surface: {
-          DEFAULT: '#F7F6F3',  // Main background (spec)
+          DEFAULT: '#F5F5F7',  // V2: Cool gray background
           warm: '#FDFCFA',
           muted: '#F5F3F0',
         },
 
         // Background colors (alias for surface for common convention)
         background: {
-          DEFAULT: '#F7F6F3',
-          light: '#F7F6F3',
+          DEFAULT: '#F5F5F7',  // V2: Cool gray
+          light: '#F5F5F7',    // V2: Cool gray
           dark: '#1F2937',
         },
 

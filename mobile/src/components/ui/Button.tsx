@@ -13,8 +13,8 @@ const colors = {
   error: '#CF3A3A',
   errorDark: '#AD2E2E',
   textPrimary: '#111827', // Spec primary text
-  border: '#E7E7E7',      // Spec border
-  surface: '#F7F6F3',     // Spec background
+  border: '#D1D5DB',      // V2: Darker border
+  surface: '#F5F5F7',     // V2: Cool gray background
 };
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';

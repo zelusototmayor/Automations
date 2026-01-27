@@ -146,7 +146,16 @@ export function CoachCard({
           'active:opacity-90 active:scale-98',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+        style={{
+          backgroundColor: colors.warmWhiteSharp,
+          borderWidth: 1.5,
+          borderColor: colors.borderSharp,
+          shadowColor: '#111827',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 4,
+        }}
       >
         <View className="p-4">
           {/* Avatar */}
@@ -201,7 +210,16 @@ export function CoachCard({
           'active:opacity-90',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+        style={{
+          backgroundColor: colors.warmWhiteSharp,
+          borderWidth: 1.5,
+          borderColor: colors.borderSharp,
+          shadowColor: '#111827',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 4,
+        }}
       >
         <View className="p-4 flex-row">
           {/* Avatar */}
@@ -428,7 +446,16 @@ export function CoachCard({
         'active:opacity-90',
         className,
       ].filter(Boolean).join(' ')}
-      style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+      style={{
+        backgroundColor: colors.warmWhiteSharp,
+        borderWidth: 1.5,
+        borderColor: colors.borderSharp,
+        shadowColor: '#111827',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 4,
+      }}
     >
       <View className="p-4">
         {/* Header row with avatar, name, and price */}

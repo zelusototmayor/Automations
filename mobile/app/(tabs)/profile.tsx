@@ -22,7 +22,7 @@ import {
 } from '../../src/components/ui/Icons';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// UI DESIGN SPEC V2 - SHARPER AESTHETIC
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
@@ -39,12 +39,12 @@ const colors = {
   skyLight: '#D9ECF7',
   skyDark: '#7A9EB0',
   cream: '#F5F0E8',
-  surface: '#F7F6F3',        // Spec background
-  warmWhite: 'rgba(255,255,255,0.88)', // Spec glass surface
+  surface: '#F5F5F7',        // V2: Cool gray background
+  warmWhite: 'rgba(255, 255, 255, 0.92)', // V2: Enhanced glass
+  border: '#D1D5DB',         // V2: Darker border
   textPrimary: '#111827',    // Spec primary text
   textSecondary: '#6B7280',  // Spec secondary text
   textMuted: '#9CA3AF',      // Spec muted text
-  border: '#E7E7E7',         // Spec border
   error: '#CF3A3A',
   premium: '#E6B800',
 };
@@ -75,8 +75,17 @@ function MenuItem({
   return (
     <Pressable
       onPress={onPress}
-      className="bg-cream-50 rounded-card-sm px-4 py-4 mb-3 flex-row items-center border border-border active:opacity-90"
-      style={{ backgroundColor: colors.warmWhite }}
+      className="rounded-card-sm px-4 py-4 mb-3 flex-row items-center active:opacity-90"
+      style={{
+        backgroundColor: colors.warmWhite,
+        borderWidth: 1.5,
+        borderColor: colors.border,
+        shadowColor: '#111827',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.10,
+        shadowRadius: 10,
+        elevation: 3,
+      }}
     >
       <View
         className="rounded-avatar w-10 h-10 items-center justify-center mr-4"

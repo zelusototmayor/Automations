@@ -10,11 +10,11 @@ import { timing, easing, createStaggeredAnimation } from '../../src/utils/animat
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// UI Design Spec V1 colors
+// UI Design Spec V2 - Sharper aesthetic
 const colors = {
   sage400: '#6F8F79',        // CTA start (spec)
   sage600: '#4F6F5A',        // CTA end (spec)
-  surface: '#F7F6F3',        // Spec background
+  surface: '#F5F5F7',        // V2: Cool gray background
   textPrimary: '#111827',    // Spec primary text
   textSecondary: '#6B7280',  // Spec secondary text
 };
