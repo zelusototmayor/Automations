@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
+import { View, Text, Pressable, Animated, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -153,25 +153,14 @@ export default function WelcomeScreen() {
               opacity: logoOpacity,
             }}
           >
-            <LinearGradient
-              colors={[colors.sage400, colors.sage600]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+            <Image
+              source={require('../../assets/logo-no-bg.png')}
               style={{
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: colors.sage600,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.3,
-                shadowRadius: 16,
-                elevation: 8,
+                width: 120,
+                height: 120,
               }}
-            >
-              <SparkleIcon size={48} color="white" strokeWidth={1.5} />
-            </LinearGradient>
+              resizeMode="contain"
+            />
           </Animated.View>
 
           {/* App Name & Tagline */}
@@ -186,7 +175,7 @@ export default function WelcomeScreen() {
                 letterSpacing: -0.5,
               }}
             >
-              CoachCraft
+              Better Coaching
             </Text>
             <Text
               className="font-inter-regular"
@@ -222,15 +211,15 @@ export default function WelcomeScreen() {
                 marginBottom: 16,
                 paddingHorizontal: 16,
                 paddingVertical: 12,
-                backgroundColor: 'rgba(255,255,255,0.88)', // Spec glass surface
+                backgroundColor: 'rgba(255,255,255,0.92)', // V2: Enhanced glass
                 borderRadius: 22, // Spec card radius
-                borderWidth: 1,
-                borderColor: '#E7E7E7', // Spec border
-                // Spec card shadow
-                shadowColor: 'rgb(17, 24, 39)',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.06,
-                shadowRadius: 28,
+                borderWidth: 1.5, // V2: Thicker border
+                borderColor: '#D1D5DB', // V2: Darker border
+                // V2: Enhanced shadow for sharper look
+                shadowColor: '#111827',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
                 elevation: 4,
               }}
             >
