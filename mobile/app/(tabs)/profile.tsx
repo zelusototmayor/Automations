@@ -62,6 +62,7 @@ function MenuItem({
   onPress,
   showArrow = true,
   danger = false,
+  comingSoon = false,
 }: {
   icon: React.ReactNode;
   iconBgColor: string;
@@ -71,10 +72,19 @@ function MenuItem({
   onPress: () => void;
   showArrow?: boolean;
   danger?: boolean;
+  comingSoon?: boolean;
 }) {
+  const handlePress = () => {
+    if (comingSoon) {
+      Alert.alert('Coming Soon', `${title} will be available in a future update.`);
+      return;
+    }
+    onPress();
+  };
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       className="rounded-card-sm px-4 py-4 mb-3 flex-row items-center active:opacity-90"
       style={{
         backgroundColor: colors.warmWhite,
@@ -85,6 +95,7 @@ function MenuItem({
         shadowOpacity: 0.10,
         shadowRadius: 10,
         elevation: 3,
+        opacity: comingSoon ? 0.6 : 1,
       }}
     >
       <View
@@ -102,7 +113,7 @@ function MenuItem({
         </Text>
         {subtitle && (
           <Text className="text-caption" style={{ color: colors.textMuted }}>
-            {subtitle}
+            {comingSoon ? 'Coming soon' : subtitle}
           </Text>
         )}
       </View>
@@ -302,6 +313,7 @@ export default function ProfileScreen() {
             title="Edit Profile"
             subtitle="Name and avatar"
             onPress={() => {}}
+            comingSoon
           />
 
           {/* Settings */}
@@ -318,6 +330,7 @@ export default function ProfileScreen() {
             title="Notifications"
             subtitle="Push and email preferences"
             onPress={() => {}}
+            comingSoon
           />
           <MenuItem
             icon={<CreditCardIcon size={20} color={colors.skyDark} />}
@@ -334,6 +347,7 @@ export default function ProfileScreen() {
             title="Privacy & Security"
             subtitle="Manage your data"
             onPress={() => {}}
+            comingSoon
           />
 
           {/* Support */}
@@ -349,6 +363,7 @@ export default function ProfileScreen() {
             iconColor={colors.sageDark}
             title="Help & FAQ"
             onPress={() => {}}
+            comingSoon
           />
           <MenuItem
             icon={<MailIcon size={20} color={colors.skyDark} />}
@@ -356,6 +371,7 @@ export default function ProfileScreen() {
             iconColor={colors.skyDark}
             title="Contact Us"
             onPress={() => {}}
+            comingSoon
           />
           <MenuItem
             icon={<FileTextIcon size={20} color={colors.blushDark} />}
@@ -363,6 +379,7 @@ export default function ProfileScreen() {
             iconColor={colors.blushDark}
             title="Terms & Privacy"
             onPress={() => {}}
+            comingSoon
           />
 
           {/* Sign Out */}

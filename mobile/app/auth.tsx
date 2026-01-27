@@ -38,12 +38,6 @@ export default function AuthScreen() {
         await signIn(email.trim(), password);
       } else {
         await signUp(email.trim(), password);
-        Alert.alert(
-          'Check Your Email',
-          'We sent you a confirmation link. Please verify your email to continue.',
-          [{ text: 'OK', onPress: () => setMode('signin') }]
-        );
-        return;
       }
       router.back();
     } catch (error: any) {
@@ -69,7 +63,7 @@ export default function AuthScreen() {
             <Text className="text-gray-500 mt-2 text-center">
               {mode === 'signin'
                 ? 'Sign in to continue your coaching journey'
-                : 'Join CoachCraft to start your journey'}
+                : 'Join Better Coaching to start your journey'}
             </Text>
           </View>
 

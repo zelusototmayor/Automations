@@ -1,6 +1,11 @@
 import CryptoJS from 'crypto-js';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-key-change-in-production';
+// ENCRYPTION_KEY MUST be set via environment variables
+if (!process.env.ENCRYPTION_KEY) {
+  throw new Error('FATAL: ENCRYPTION_KEY environment variable is not set. Server cannot start without it.');
+}
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 /**
  * Encrypt sensitive data (like OAuth tokens) using AES-256

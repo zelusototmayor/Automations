@@ -384,7 +384,7 @@ function WelcomeView({
                   Free Preview Available
                 </Text>
                 <Text className="text-body-sm" style={{ color: colors.sage }}>
-                  Try 1 free message with this coach
+                  Try 5 free messages with this coach
                 </Text>
               </View>
             </View>
@@ -422,6 +422,7 @@ export default function ChatScreen() {
     sendMessage,
     fetchConversation,
     clearCurrentConversation,
+    startNewConversation,
   } = useChatStore();
 
   const { fetchAgent } = useAgentsStore();
@@ -450,6 +451,13 @@ export default function ChatScreen() {
         await fetchConversation(initialConvId);
         setConversationId(initialConvId);
         setHasUserSentMessage(true);
+      } else {
+        // New conversation — show the coach's greeting message
+        const greeting = getGreetingMessage(agentData);
+        if (greeting) {
+          startNewConversation(agentId!, greeting);
+          setHasUserSentMessage(true);
+        }
       }
     } catch (error) {
       console.error('Error loading chat:', error);
@@ -493,7 +501,7 @@ export default function ChatScreen() {
       if (error.message === 'FREE_TRIAL_EXHAUSTED') {
         Alert.alert(
           'Free Trial Used',
-          "You've used your free message with this coach. Subscribe to continue the conversation.",
+          "You've used all 5 free messages with this coach. Subscribe to continue the conversation.",
           [
             { text: 'Not Now', style: 'cancel' },
             {

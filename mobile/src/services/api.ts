@@ -1,7 +1,8 @@
 import { getAccessToken, refreshAccessToken } from './auth';
 import type { Agent, Category, Conversation, Message, User, UserContext, Subscription } from '../types';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3003/api';
+// Default port 3000 matches backend default (PORT=3000 in backend/.env.example)
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Helper to get auth headers
 async function getAuthHeaders(): Promise<HeadersInit> {

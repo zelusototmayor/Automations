@@ -3,9 +3,16 @@ import jwt from 'jsonwebtoken';
 import { prisma } from './database';
 import { User } from '@prisma/client';
 
-// Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET; // Separate secret for refresh tokens
+// Configuration — secrets MUST be set via environment variables
+if (!process.env.JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set. Server cannot start without it.');
+}
+if (!process.env.JWT_REFRESH_SECRET) {
+  throw new Error('FATAL: JWT_REFRESH_SECRET environment variable is not set. Server cannot start without it.');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const JWT_EXPIRES_IN = '15m'; // Short-lived access token
 const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
 

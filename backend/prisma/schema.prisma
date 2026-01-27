@@ -195,10 +195,11 @@ model AgentRating {
 // ============================================
 
 model FreeTrial {
-  id        String   @id @default(uuid())
-  visitorId String   @map("visitor_id") // Can be anonymous user or user ID
-  agentId   String   @map("agent_id")
-  usedAt    DateTime @default(now()) @map("used_at")
+  id           String   @id @default(uuid())
+  visitorId    String   @map("visitor_id") // Can be anonymous user or user ID
+  agentId      String   @map("agent_id")
+  messageCount Int      @default(1) @map("message_count") // Number of free messages used
+  usedAt       DateTime @default(now()) @map("used_at")
 
   // Relations
   agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
