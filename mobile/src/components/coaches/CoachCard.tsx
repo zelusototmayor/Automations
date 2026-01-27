@@ -8,36 +8,36 @@ import type { Agent } from '../../types';
 import { getAvatarByHash } from '../../utils/avatars';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// BETTER COACHING DESIGN SYSTEM - NEUTRAL BASE WITH SAGE ACCENT
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
-  sage: '#6F8F79',          // CTA start (spec)
-  sageLight: '#DCE9DF',     // Sage pastel (spec)
-  sageDark: '#4F6F5A',      // CTA end (spec)
-  lavender: '#E7E0F3',      // Lavender pastel (spec)
-  lavenderLight: '#E7E0F3',
-  lavenderDark: '#8A7A9E',
-  blush: '#D4A5A5',
-  blushLight: '#F0D4D4',
-  blushDark: '#B87878',
-  sky: '#D9ECF7',           // Sky pastel (spec)
-  skyLight: '#D9ECF7',
-  skyDark: '#7A9EB0',
-  cream: '#F5F0E8',
-  warmWhite: 'rgba(255,255,255,0.88)', // Spec glass surface
-  textPrimary: '#111827',   // Spec primary text
-  textSecondary: '#6B7280', // Spec secondary text
-  textMuted: '#9CA3AF',     // Spec muted text
-  border: '#E7E7E7',        // Spec border
+  // Backgrounds
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceSecondary: '#F3F4F6',
+  border: '#E5E7EB',
+  // Text
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  textTertiary: '#9CA3AF',
+  // Accent (sage green)
+  primary: '#4A7C59',
+  primaryLight: '#E8F0EB',
+  primaryDark: '#3D6649',
+  // Special
+  premium: '#7C6FA0',
+  premiumLight: '#E8E5F0',
+  error: '#DC2626',
+  success: '#16A34A',
 };
 
-// Avatar gradient colors based on name hash (using CTA gradient for primary)
+// Avatar gradient colors based on name hash (sage green only)
 const avatarGradients = [
-  ['#6F8F79', '#4F6F5A'],  // Sage CTA gradient (spec)
-  ['#B8A9C9', '#8A7A9E'],  // Lavender gradient
-  ['#D4A5A5', '#B87878'],  // Blush gradient
-  ['#A5C4D4', '#7A9EB0'],  // Sky gradient
+  ['#4A7C59', '#3D6649'],  // Primary sage gradient
+  ['#5A8B69', '#4A7C59'],  // Lighter sage variation
+  ['#3D6649', '#2D5039'],  // Darker sage variation
+  ['#6B9C7A', '#5A8B69'],  // Lightest sage variation
 ];
 
 function getAvatarGradient(name: string): [string, string] {
@@ -144,7 +144,7 @@ export function CoachCard({
           'active:opacity-90 active:scale-98',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+        style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <View className="p-4">
           {/* Avatar */}
@@ -164,7 +164,7 @@ export function CoachCard({
           {/* Tagline */}
           <Text
             className="text-caption mt-1"
-            style={{ color: colors.textMuted }}
+            style={{ color: colors.textTertiary }}
             numberOfLines={2}
           >
             {agent.tagline}
@@ -199,7 +199,7 @@ export function CoachCard({
           'active:opacity-90',
           className,
         ].filter(Boolean).join(' ')}
-        style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+        style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <View className="p-4 flex-row">
           {/* Avatar */}
@@ -221,7 +221,7 @@ export function CoachCard({
                 </Text>
                 {agent.is_verified && (
                   <View className="ml-1.5">
-                    <VerifiedIcon size={16} color={colors.sage} />
+                    <VerifiedIcon size={16} color={colors.primary} />
                   </View>
                 )}
               </View>
@@ -287,7 +287,7 @@ export function CoachCard({
           className,
         ].filter(Boolean).join(' ')}
         style={{
-          backgroundColor: colors.warmWhite,
+          backgroundColor: colors.surface,
           borderWidth: 1,
           borderColor: colors.border,
           borderRadius: 22, // Spec card radius
@@ -348,7 +348,7 @@ export function CoachCard({
                     {ratingCount && (
                       <Text
                         className="text-caption ml-0.5"
-                        style={{ color: colors.textMuted }}
+                        style={{ color: colors.textTertiary }}
                       >
                         ({ratingCount})
                       </Text>
@@ -357,10 +357,10 @@ export function CoachCard({
                 ) : null}
                 {usageCount && (
                   <View className="flex-row items-center ml-2">
-                    <CheckIcon size={12} color={colors.sage} />
+                    <CheckIcon size={12} color={colors.primary} />
                     <Text
                       className="text-caption ml-0.5"
-                      style={{ color: colors.textMuted }}
+                      style={{ color: colors.textTertiary }}
                     >
                       {usageCount} users
                     </Text>
@@ -371,7 +371,7 @@ export function CoachCard({
               {/* Description/tagline - single line */}
               <Text
                 className="text-caption mt-0.5"
-                style={{ color: colors.textMuted, lineHeight: 16 }}
+                style={{ color: colors.textTertiary, lineHeight: 16 }}
                 numberOfLines={1}
               >
                 {agent.tagline}
@@ -388,16 +388,16 @@ export function CoachCard({
             >
               {displayTags.join(' · ')}
               {extraTagsCount > 0 && (
-                <Text style={{ color: colors.textMuted }}> +{extraTagsCount}</Text>
+                <Text style={{ color: colors.textTertiary }}> +{extraTagsCount}</Text>
               )}
             </Text>
           )}
 
-          {/* CTA Button - spec sage CTA color */}
+          {/* CTA Button - sage green accent */}
           <Pressable
             onPress={handlePress}
             className="py-1.5 items-center active:opacity-80"
-            style={{ backgroundColor: colors.sage, borderRadius: 14 }}
+            style={{ backgroundColor: colors.primary, borderRadius: 14 }}
           >
             <Text
               className="text-body-sm font-inter-medium"
@@ -426,7 +426,7 @@ export function CoachCard({
         'active:opacity-90',
         className,
       ].filter(Boolean).join(' ')}
-      style={{ backgroundColor: colors.warmWhite, borderColor: colors.border }}
+      style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <View className="p-4">
         {/* Header row with avatar, name, and price */}
@@ -460,13 +460,13 @@ export function CoachCard({
           <View
             className="ml-2 px-2 py-1 rounded-md"
             style={{
-              backgroundColor: agent.tier === 'free' ? colors.sageLight : colors.lavenderLight,
+              backgroundColor: agent.tier === 'free' ? colors.primaryLight : colors.premiumLight,
             }}
           >
             <Text
               className="text-caption font-inter-medium"
               style={{
-                color: agent.tier === 'free' ? colors.sageDark : colors.lavenderDark,
+                color: agent.tier === 'free' ? colors.primary : colors.premium,
               }}
             >
               {priceText}
@@ -483,7 +483,7 @@ export function CoachCard({
               size="sm"
             />
           ) : (
-            <Text className="text-caption" style={{ color: colors.textMuted }}>
+            <Text className="text-caption" style={{ color: colors.textTertiary }}>
               New coach
             </Text>
           )}
@@ -494,13 +494,13 @@ export function CoachCard({
           <View className="flex-row items-center mt-2">
             <Text
               className="text-caption"
-              style={{ color: colors.textMuted }}
+              style={{ color: colors.textTertiary }}
             >
               by {agent.creator_name}
             </Text>
             {agent.is_verified && (
               <View className="ml-1">
-                <VerifiedIcon size={12} color={colors.sage} />
+                <VerifiedIcon size={12} color={colors.primary} />
               </View>
             )}
           </View>

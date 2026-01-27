@@ -9,181 +9,130 @@ module.exports = {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════════
-        // UI DESIGN SPEC V1 - PREMIUM PASTEL COLOR PALETTE
+        // BETTER COACHING DESIGN SYSTEM - NEUTRAL BASE WITH SAGE ACCENT
         // ═══════════════════════════════════════════════════════════════════
 
-        // Primary - Sage (calming, growth, wellness)
+        // Primary - Sage (calming, growth, wellness) - THE SOLE ACCENT COLOR
         sage: {
-          50: '#F4F7F3',
-          100: '#E8EFE6',
-          200: '#DCE9DF',  // Main pastel (spec)
-          300: '#B8C9B2',
-          400: '#6F8F79',  // CTA start (spec)
-          500: '#5F8069',
-          600: '#4F6F5A',  // CTA end (spec)
-          700: '#3F5F4A',
-          800: '#2F4F3A',
-          900: '#1F3F2A',
-          DEFAULT: '#6F8F79',
+          50: '#F0F4F1',
+          100: '#E8F0EB',  // primaryLight (tag backgrounds, selected states)
+          200: '#D1E3D8',
+          300: '#A8C9B3',
+          400: '#6B9C7A',  // Lighter sage variation
+          500: '#4A7C59',  // primary (buttons, CTAs, links)
+          600: '#3D6649',  // primaryDark (pressed states)
+          700: '#2D5039',
+          800: '#1F3929',
+          900: '#14281C',
+          DEFAULT: '#4A7C59',
         },
 
         // Primary alias (maps to sage for common convention)
         primary: {
-          50: '#F4F7F3',
-          100: '#E8EFE6',
-          200: '#DCE9DF',
-          300: '#B8C9B2',
-          400: '#6F8F79',
-          500: '#5F8069',
-          600: '#4F6F5A',
-          700: '#3F5F4A',
-          800: '#2F4F3A',
-          900: '#1F3F2A',
-          DEFAULT: '#6F8F79',
+          50: '#F0F4F1',
+          100: '#E8F0EB',  // primaryLight
+          200: '#D1E3D8',
+          300: '#A8C9B3',
+          400: '#6B9C7A',
+          500: '#4A7C59',  // primary DEFAULT
+          600: '#3D6649',  // primaryDark
+          700: '#2D5039',
+          800: '#1F3929',
+          900: '#14281C',
+          DEFAULT: '#4A7C59',
         },
 
-        // Neutral - Gray scale for backgrounds, borders, disabled states
+        // Neutral - Gray scale for backgrounds, borders, text hierarchy
         neutral: {
-          50: '#FAFAFA',
-          100: '#F5F5F5',
-          200: '#E5E5E5',
-          300: '#D4D4D4',
-          400: '#A3A3A3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
+          50: '#F9FAFB',
+          100: '#F3F4F6',  // surfaceSecondary
+          200: '#E5E7EB',  // border
+          300: '#D1D5DB',
+          400: '#9CA3AF',  // textTertiary
+          500: '#6B7280',  // textSecondary
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',  // textPrimary
+          DEFAULT: '#6B7280',
         },
 
-        // Secondary - Lavender (calm, creativity, premium)
-        lavender: {
-          50: '#F8F5FA',
-          100: '#F0EAF4',
-          200: '#E7E0F3',  // Main pastel (spec)
-          300: '#CDBFDB',
-          400: '#B8A9C9',
-          500: '#A08FB8',
-          600: '#8A7A9E',
-          700: '#6E6180',
-          800: '#564C64',
-          900: '#433B4E',
-          DEFAULT: '#E7E0F3',
+        // Premium - Purple tone (ONLY for premium badges/indicators)
+        premium: {
+          50: '#F5F3F7',
+          100: '#E8E5F0',
+          200: '#D8D3E5',
+          300: '#B8AFD1',
+          400: '#9A8FB8',
+          500: '#7C6FA0',  // premium (only for badges)
+          600: '#6B5F8A',
+          700: '#544D6E',
+          800: '#3F3B52',
+          900: '#2D2A3A',
+          DEFAULT: '#7C6FA0',
         },
 
-        // Accent - Blush (warmth, approachability)
-        blush: {
-          50: '#FDF6F6',
-          100: '#FAEAEA',
-          200: '#F0D4D4',
-          300: '#E2BABA',
-          400: '#D4A5A5',
-          500: '#C08888',
-          600: '#B87878',
-          700: '#9A5F5F',
-          800: '#7A4B4B',
-          900: '#5F3A3A',
-          DEFAULT: '#D4A5A5',
-        },
-
-        // Accent - Sky (clarity, trust, openness)
-        sky: {
-          50: '#F5F9FB',
-          100: '#E8F2F7',
-          200: '#D9ECF7',  // Main pastel (spec)
-          300: '#BCD5E2',
-          400: '#A5C4D4',
-          500: '#8AB1C4',
-          600: '#7A9EB0',
-          700: '#5F7D8C',
-          800: '#4A626E',
-          900: '#3A4D56',
-          DEFAULT: '#D9ECF7',
-        },
-
-        // Accent - Sand (warmth, tertiary)
-        sand: {
-          50: '#FBF9F6',
-          100: '#F7F3ED',
-          200: '#F1E9DD',  // Main pastel (spec)
-          300: '#E5D9C7',
-          400: '#D9C9B1',
-          500: '#CDB99B',
-          DEFAULT: '#F1E9DD',
-        },
-
-        // Neutral - Cream & Warm tones
-        cream: {
-          50: '#FDFCFA',
-          100: '#FAF8F5',
-          200: '#F5F0E8',
-          300: '#EDE5D8',
-          400: '#E0D4C4',
-          500: '#CFC0AC',
-          DEFAULT: '#F5F0E8',
-        },
-
-        // Surface colors for backgrounds (spec)
+        // Surface colors for backgrounds - NEUTRAL WHITES/GRAYS
         surface: {
-          DEFAULT: '#F7F6F3',  // Main background (spec)
-          warm: '#FDFCFA',
-          muted: '#F5F3F0',
+          DEFAULT: '#FFFFFF',  // White card backgrounds
+          secondary: '#F3F4F6',  // Subtle gray for sections
+          tertiary: '#F9FAFB',
         },
 
-        // Background colors (alias for surface for common convention)
+        // Background colors (alias for surface)
         background: {
-          DEFAULT: '#F7F6F3',
-          light: '#F7F6F3',
+          DEFAULT: '#FFFFFF',
+          light: '#FFFFFF',
           dark: '#1F2937',
         },
 
-        // Text colors (spec)
+        // Text colors - REFINED HIERARCHY
         text: {
-          primary: '#111827',    // Spec value
-          secondary: '#6B7280',  // Spec value
-          muted: '#9CA3AF',      // Spec value (placeholder)
+          primary: '#111827',    // Main text
+          secondary: '#6B7280',  // Secondary text
+          tertiary: '#9CA3AF',   // Muted/placeholder text (was 'muted')
           inverse: '#FFFFFF',
         },
 
-        // Border colors (spec)
+        // Border colors - CLEAN GRAYS
         border: {
-          DEFAULT: '#E7E7E7',  // Spec value
-          light: '#F0EDE8',
-          dark: '#D8D5D0',
+          DEFAULT: '#E5E7EB',  // Main border color
+          light: '#F3F4F6',
+          dark: '#D1D5DB',
         },
 
         // ═══════════════════════════════════════════════════════════════════
         // SEMANTIC COLORS - For specific purposes
         // ═══════════════════════════════════════════════════════════════════
 
-        // Success - Green (spec: #22C55E)
+        // Success - Clean green
         success: {
           50: '#F0FDF4',
           100: '#DCFCE7',
           200: '#BBF7D0',
           300: '#86EFAC',
           400: '#4ADE80',
-          500: '#22C55E',  // Main success (spec)
-          600: '#16A34A',
+          500: '#22C55E',
+          600: '#16A34A',  // Main success
           700: '#15803D',
           800: '#166534',
           900: '#14532D',
-          DEFAULT: '#22C55E',
+          DEFAULT: '#16A34A',
         },
 
-        // Error - Soft red (aligned with blush)
+        // Error - Clean red
         error: {
-          50: '#FEF5F5',
-          100: '#FDE8E8',
-          200: '#FAD0D0',
-          300: '#F5ABAB',
-          400: '#ED7D7D',
-          500: '#E25555',
-          600: '#CF3A3A',  // Main error
-          700: '#AD2E2E',
-          800: '#8F2929',
-          900: '#772828',
-          DEFAULT: '#CF3A3A',
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          200: '#FECACA',
+          300: '#FCA5A5',
+          400: '#F87171',
+          500: '#EF4444',
+          600: '#DC2626',  // Main error
+          700: '#B91C1C',
+          800: '#991B1B',
+          900: '#7F1D1D',
+          DEFAULT: '#DC2626',
         },
 
         // Warning - Soft amber
@@ -201,33 +150,21 @@ module.exports = {
           DEFAULT: '#E8920F',
         },
 
-        // Premium/Gold - For subscription badges
-        premium: {
-          50: '#FFFDF5',
-          100: '#FFF9E5',
-          200: '#FFF0C2',
-          300: '#FFE599',
-          400: '#FFD966',
-          500: '#FFCC33',
-          600: '#E6B800',
-          DEFAULT: '#E6B800',
-        },
-
         // ═══════════════════════════════════════════════════════════════════
-        // LIQUID GLASS - For glassmorphism effects (spec)
+        // GLASS EFFECTS - Minimal use, neutral white
         // ═══════════════════════════════════════════════════════════════════
         glass: {
-          white: 'rgba(255, 255, 255, 0.88)',  // Spec surface opacity
-          border: 'rgba(255, 255, 255, 0.4)',
-          shadow: 'rgba(17, 24, 39, 0.06)',    // Spec shadow color
+          white: 'rgba(255, 255, 255, 0.95)',
+          border: 'rgba(229, 231, 235, 0.8)',
+          shadow: 'rgba(17, 24, 39, 0.06)',
         },
 
         // ═══════════════════════════════════════════════════════════════════
-        // CTA COLORS (spec)
+        // CTA COLORS - Sage green accent
         // ═══════════════════════════════════════════════════════════════════
         cta: {
-          start: '#6F8F79',  // Gradient start
-          end: '#4F6F5A',    // Gradient end
+          start: '#4A7C59',  // primary
+          end: '#3D6649',    // primaryDark
         },
 
         // Ink color for dark text/icons on light surfaces (spec)

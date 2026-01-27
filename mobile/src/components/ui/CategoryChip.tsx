@@ -1,17 +1,16 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// BETTER COACHING DESIGN SYSTEM - NEUTRAL BASE WITH SAGE ACCENT
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
-  sage: '#6F8F79',          // CTA start (spec)
-  sageDark: '#4F6F5A',      // CTA end (spec)
-  sageLight: '#DCE9DF',     // Sage pastel (spec)
-  warmWhite: 'rgba(255,255,255,0.88)', // Spec glass surface
-  border: '#E7E7E7',        // Spec border
-  textPrimary: '#111827',   // Spec primary text
-  textSecondary: '#6B7280', // Spec secondary text
+  surface: '#FFFFFF',
+  border: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  primary: '#4A7C59',
+  primaryLight: '#E8F0EB',
 };
 
 interface CategoryChipProps {
@@ -43,9 +42,9 @@ export function CategoryChip({
         className,
       ].filter(Boolean).join(' ')}
       style={{
-        backgroundColor: selected ? colors.sage : colors.warmWhite,
+        backgroundColor: selected ? colors.primary : colors.surface,
         borderWidth: 1,
-        borderColor: selected ? colors.sage : colors.border,
+        borderColor: selected ? colors.primary : colors.border,
       }}
     >
       <Text
@@ -142,7 +141,7 @@ export function CategoryCard({
         className,
       ].filter(Boolean).join(' ')}
       style={{
-        backgroundColor: colors.warmWhite,
+        backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 22, // Spec card/chip radius
@@ -152,11 +151,11 @@ export function CategoryCard({
       {/* Subtle initial circle on left - smaller 32px */}
       <View
         className="w-8 h-8 rounded-full items-center justify-center mr-2.5"
-        style={{ backgroundColor: colors.sageLight }}
+        style={{ backgroundColor: colors.primaryLight }}
       >
         <Text
           className="font-inter-semibold text-body-sm"
-          style={{ color: colors.sageDark }}
+          style={{ color: colors.primary }}
         >
           {initial}
         </Text>

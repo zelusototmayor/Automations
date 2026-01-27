@@ -74,7 +74,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#F7F6F3' }, // Spec: background base
+            contentStyle: { backgroundColor: '#FFFFFF' }, // Neutral white background
           }}
         >
           <Stack.Screen name="(welcome)" options={{ headerShown: false }} />

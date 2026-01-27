@@ -3,11 +3,13 @@ import { useRouter } from 'expo-router';
 import { ChevronRightIcon } from '../ui/Icons';
 
 const colors = {
-  cardBg: '#F1E9DD',         // Sand pastel (spec)
-  textPrimary: '#111827',    // Spec primary text
-  textSecondary: '#6B7280',  // Spec secondary text
-  sage: '#6F8F79',           // CTA start (spec)
-  sageDark: '#4F6F5A',       // CTA end (spec)
+  surface: '#FFFFFF',
+  surfaceSecondary: '#F3F4F6',
+  border: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  primary: '#4A7C59',
+  primaryDark: '#3D6649',
 };
 
 /**
@@ -20,7 +22,11 @@ export function FindYourCoachCard() {
   return (
     <View
       className="mx-5 rounded-2xl p-4 mb-6"
-      style={{ backgroundColor: colors.cardBg }}
+      style={{
+        backgroundColor: colors.surfaceSecondary,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}
     >
       {/* Title and subtitle */}
       <Text
@@ -42,7 +48,7 @@ export function FindYourCoachCard() {
         <Pressable
           onPress={() => router.push('/quiz')}
           className="px-4 py-1.5 rounded-full active:opacity-80 mr-3"
-          style={{ backgroundColor: colors.sage }}
+          style={{ backgroundColor: colors.primary }}
         >
           <Text className="text-body-sm font-inter-semibold text-white">
             Get matched
@@ -56,11 +62,11 @@ export function FindYourCoachCard() {
         >
           <Text
             className="text-body-sm font-inter-medium"
-            style={{ color: colors.sageDark }}
+            style={{ color: colors.primary }}
           >
             Browse categories
           </Text>
-          <ChevronRightIcon size={16} color={colors.sageDark} />
+          <ChevronRightIcon size={16} color={colors.primary} />
         </Pressable>
       </View>
     </View>

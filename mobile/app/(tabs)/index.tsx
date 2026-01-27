@@ -18,25 +18,35 @@ import { FindYourCoachCard } from '../../src/components/coaches/FindYourCoachCar
 import { SearchBar, CategoryCard } from '../../src/components/ui';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UI DESIGN SPEC V1 COLORS
+// BETTER COACHING DESIGN SYSTEM - NEUTRAL BASE WITH SAGE ACCENT
 // ═══════════════════════════════════════════════════════════════════════════
 
 const colors = {
-  sage: '#6F8F79',           // CTA start (spec)
-  sageDark: '#4F6F5A',       // CTA end (spec)
-  sageLight: '#DCE9DF',      // Sage pastel (spec)
-  surface: '#F7F6F3',        // Spec background
-  textPrimary: '#111827',    // Spec primary text
-  textSecondary: '#6B7280',  // Spec secondary text
-  textMuted: '#9CA3AF',      // Spec muted text
+  // Backgrounds
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceSecondary: '#F3F4F6',
+  border: '#E5E7EB',
+  // Text
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  textTertiary: '#9CA3AF',
+  // Accent (sage green)
+  primary: '#4A7C59',
+  primaryLight: '#E8F0EB',
+  primaryDark: '#3D6649',
+  // Special
+  premium: '#7C6FA0',
+  error: '#DC2626',
+  success: '#16A34A',
 };
 
-// Avatar gradient colors for Continue section cards (using spec CTA for sage)
+// Avatar gradient colors for Continue section cards (sage green only)
 const avatarGradients = [
-  ['#C4B5D4', '#A890BE'], // Lavender/purple
-  ['#6F8F79', '#4F6F5A'], // Sage green (spec CTA gradient)
-  ['#D4A5A5', '#BE8A8A'], // Blush pink
-  ['#A5C4D4', '#8AAEBD'], // Sky blue
+  ['#4A7C59', '#3D6649'], // Sage green gradient (primary to primaryDark)
+  ['#5A8B69', '#4A7C59'], // Lighter sage variation
+  ['#3D6649', '#2D5039'], // Darker sage variation
+  ['#6B9C7A', '#5A8B69'], // Lightest sage variation
 ];
 
 function getAvatarGradient(name: string): [string, string] {
@@ -85,7 +95,7 @@ export default function HomeScreen() {
   const recentConversations = conversations.slice(0, 5);
 
   return (
-    <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }} edges={['top']}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -100,7 +110,7 @@ export default function HomeScreen() {
                 fetchConversations();
               }
             }}
-            tintColor={colors.sage}
+            tintColor={colors.primary}
           />
         }
       >
@@ -118,15 +128,14 @@ export default function HomeScreen() {
           /* Continue Section - Shows recent conversations */
           <View className="mb-6">
             <View className="px-5 flex-row justify-between items-center mb-3">
-              <Text className="text-section font-inter-semibold text-text-primary">
+              <Text className="text-section font-inter-semibold" style={{ color: colors.textPrimary }}>
                 Continue
               </Text>
-              <Text
-                className="text-body-sm text-sage-600 font-inter-medium"
-                onPress={() => router.push('/(tabs)/history')}
-              >
-                See all
-              </Text>
+              <Pressable onPress={() => router.push('/(tabs)/history')}>
+                <Text className="text-body-sm font-inter-medium" style={{ color: colors.primary }}>
+                  See all
+                </Text>
+              </Pressable>
             </View>
             <ScrollView
               horizontal
@@ -158,9 +167,9 @@ export default function HomeScreen() {
                     onPress={() => router.push(`/chat/${agent.id}?conversationId=${conversation.id}`)}
                     className="mr-3 rounded-2xl overflow-hidden"
                     style={{
-                      backgroundColor: '#FDFCFA',
+                      backgroundColor: colors.surface,
                       borderWidth: 1,
-                      borderColor: '#E7E7E7', // Spec border
+                      borderColor: colors.border,
                       width: 170,
                       shadowColor: '#000',
                       shadowOffset: { width: 0, height: 2 },
@@ -189,7 +198,7 @@ export default function HomeScreen() {
                       {isPremium && (
                         <View
                           className="w-6 h-6 rounded-full items-center justify-center"
-                          style={{ backgroundColor: 'rgba(255,255,255,0.3)' }}
+                          style={{ backgroundColor: colors.premium }}
                         >
                           <Text className="text-xs font-inter-bold text-white">
                             P
@@ -220,11 +229,11 @@ export default function HomeScreen() {
                         {hasUnread && (
                           <View
                             className="px-2 py-0.5 rounded mr-2"
-                            style={{ backgroundColor: '#F0EDE8' }}
+                            style={{ backgroundColor: colors.primaryLight }}
                           >
                             <Text
                               className="text-xs font-inter-medium"
-                              style={{ color: colors.textSecondary }}
+                              style={{ color: colors.primary }}
                             >
                               Unread
                             </Text>
@@ -232,7 +241,7 @@ export default function HomeScreen() {
                         )}
                         <Text
                           className="text-caption"
-                          style={{ color: colors.textMuted }}
+                          style={{ color: colors.textTertiary }}
                         >
                           {timeAgo}
                         </Text>
@@ -251,15 +260,14 @@ export default function HomeScreen() {
         {/* Categories */}
         <View className="mb-6">
           <View className="px-5 flex-row justify-between items-center mb-3">
-            <Text className="text-section font-inter-semibold text-text-primary">
+            <Text className="text-section font-inter-semibold" style={{ color: colors.textPrimary }}>
               Categories
             </Text>
-            <Text
-              className="text-body font-inter-bold text-sage-600"
-              onPress={() => router.push('/explore')}
-            >
-              {'>>'}
-            </Text>
+            <Pressable onPress={() => router.push('/explore')}>
+              <Text className="text-body font-inter-bold" style={{ color: colors.primary }}>
+                {'>>'}
+              </Text>
+            </Pressable>
           </View>
           <ScrollView
             horizontal
@@ -280,13 +288,13 @@ export default function HomeScreen() {
         {/* Recommended for you (renamed from Featured Coaches) */}
         <View className="px-5 pb-4">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-section font-inter-semibold text-text-primary">
+            <Text className="text-section font-inter-semibold" style={{ color: colors.textPrimary }}>
               Recommended for you
             </Text>
           </View>
           {isLoadingFeatured ? (
             <View className="py-8 items-center">
-              <ActivityIndicator color={colors.sage} />
+              <ActivityIndicator color={colors.primary} />
             </View>
           ) : (
             <View className="flex-row flex-wrap" style={{ marginHorizontal: -6 }}>
@@ -304,16 +312,16 @@ export default function HomeScreen() {
           onPress={() => router.push('/explore')}
           className="mx-5 mb-8 py-4 px-4 flex-row items-center rounded-xl"
           style={{
-            backgroundColor: '#FDFCFA',
+            backgroundColor: colors.surface,
             borderWidth: 1,
-            borderColor: '#E7E7E7', // Spec border
+            borderColor: colors.border,
           }}
         >
           <View
             className="w-8 h-8 rounded-full items-center justify-center mr-3"
-            style={{ backgroundColor: colors.sageLight }}
+            style={{ backgroundColor: colors.primaryLight }}
           >
-            <Text className="text-body-sm" style={{ color: colors.sageDark }}>🏠</Text>
+            <Text className="text-body-sm" style={{ color: colors.primary }}>🏠</Text>
           </View>
           <Text
             className="flex-1 font-inter-medium text-body"
@@ -323,7 +331,7 @@ export default function HomeScreen() {
           </Text>
           <Text
             className="text-body font-inter-medium"
-            style={{ color: colors.sageDark }}
+            style={{ color: colors.primary }}
           >
             {'>'}
           </Text>
