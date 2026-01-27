@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/lib/store';
 
 interface AppLayoutProps {
@@ -47,10 +48,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center space-x-8">
               <Link
                 href="/dashboard"
-                className="text-xl font-semibold"
-                style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
+                className="flex items-center gap-2"
               >
-                Better Coaching
+                <Image
+                  src="/images/logo-no-bg.png"
+                  alt="Better Coaching"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
+                <span className="text-xl font-semibold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                  Better Coaching
+                </span>
               </Link>
               <nav className="hidden md:flex space-x-2">
                 {navItems.map((item) => (

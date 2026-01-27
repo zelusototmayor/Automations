@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '../src/stores/auth';
+import VideoSplash from '../src/components/VideoSplash';
 import '../global.css';
 
 // Keep splash screen visible while loading fonts
@@ -14,6 +15,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
+  const [showVideoSplash, setShowVideoSplash] = useState(true);
 
   const initialize = useAuthStore((state) => state.initialize);
   const isInitialized = useAuthStore((state) => state.isInitialized);
@@ -125,6 +127,9 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        {showVideoSplash && (
+          <VideoSplash onFinish={() => setShowVideoSplash(false)} />
+        )}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
