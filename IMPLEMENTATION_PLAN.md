@@ -7,7 +7,7 @@
 
 | Phase | Feature | Est. Time | Status |
 |-------|---------|-----------|--------|
-| 1A | User Context Onboarding | 2-3 days | 🔄 In Progress |
+| 1A | User Context Onboarding | 2-3 days | ✅ Complete |
 | 1B | Structured Assessments | 3-5 days | 🔲 Not Started |
 | 2A | TTS Voice Output | 3-4 days | 🔲 Not Started |
 | 2B | Push Notifications | 5-7 days | 🔲 Not Started |
@@ -34,9 +34,9 @@
 | M08 | Create onboarding step 5: Challenges textarea | ✅ | |
 | M09 | Integrate onboarding completion - save context | ✅ | Call PATCH /users/me/context |
 | M10 | Redirect new users to onboarding in _layout.tsx | ✅ | Check hasCompletedOnboarding |
-| M11 | Create ContextRefreshBanner component | 🔲 | For home screen |
-| M12 | Add ContextRefreshBanner to home screen | 🔲 | Show if context > 30 days old |
-| M13 | Add dismiss logic (7-day snooze) | 🔲 | Store dismissedAt in User |
+| M11 | Create ContextRefreshBanner component | ✅ | For home screen |
+| M12 | Add ContextRefreshBanner to home screen | ✅ | Show if context > 30 days old |
+| M13 | Add dismiss logic (7-day snooze) | ✅ | Store dismissedAt in User |
 
 **Validation:** New user signs up → sees onboarding → completes → lands on home
 

@@ -16,6 +16,7 @@ import { useAuthStore } from '../../src/stores/auth';
 import { CoachCard } from '../../src/components/coaches/CoachCard';
 import { FindYourCoachCard } from '../../src/components/coaches/FindYourCoachCard';
 import { SearchBar, CategoryCard } from '../../src/components/ui';
+import { ContextRefreshBanner } from '../../src/components/ContextRefreshBanner';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UI DESIGN SPEC V2 - SHARPER, GLASSIER AESTHETIC
@@ -64,7 +65,7 @@ export default function HomeScreen() {
     fetchConversations,
   } = useChatStore();
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     fetchFeatured();
@@ -107,13 +108,21 @@ export default function HomeScreen() {
         }
       >
         {/* Search Bar at top */}
-        <View className="px-5 pt-4 mb-6">
+        <View className="px-5 pt-4 mb-4">
           <SearchBar
             editable={false}
             onPress={() => router.push('/explore')}
             placeholder="Search coaches..."
           />
         </View>
+
+        {/* Context Refresh Banner - shows when context is stale */}
+        {isAuthenticated && (
+          <ContextRefreshBanner
+            contextLastUpdatedAt={(user as any)?.contextLastUpdatedAt}
+            contextNudgeDismissedAt={(user as any)?.contextNudgeDismissedAt}
+          />
+        )}
 
         {/* Conditional: Continue Section OR Find Your Coach Card */}
         {hasConversations ? (
