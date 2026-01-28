@@ -125,6 +125,45 @@ export interface ChatResponse {
   message: Message;
 }
 
+// ============================================
+// ASSESSMENT TYPES
+// ============================================
+
+export type AssessmentQuestionType = 'scale_1_10' | 'multiple_choice' | 'open_text';
+export type AssessmentTriggerType = 'first_message' | 'on_demand' | 'scheduled';
+
+export interface AssessmentQuestion {
+  id: string;
+  text: string;
+  type: AssessmentQuestionType;
+  options?: string[];    // For multiple_choice
+  category?: string;     // For grouping (e.g., "Career", "Health")
+  required?: boolean;
+}
+
+export interface AssessmentConfig {
+  id: string;
+  name: string;
+  description?: string;
+  triggerType: AssessmentTriggerType;
+  questions: AssessmentQuestion[];
+}
+
+export interface AssessmentResponseAnswer {
+  questionId: string;
+  value: string | number;
+}
+
+export interface AssessmentResponse {
+  id: string;
+  assessmentId: string;
+  userId: string;
+  agentId: string;
+  conversationId?: string;
+  answers: Record<string, string | number>;  // questionId -> answer
+  completedAt: string;
+}
+
 // RevenueCat webhook types
 export interface RevenueCatWebhookEvent {
   api_version: string;

@@ -8,7 +8,7 @@
 | Phase | Feature | Est. Time | Status |
 |-------|---------|-----------|--------|
 | 1A | User Context Onboarding | 2-3 days | ✅ Complete |
-| 1B | Structured Assessments | 3-5 days | 🔲 Not Started |
+| 1B | Structured Assessments | 3-5 days | 🔄 In Progress |
 | 2A | TTS Voice Output | 3-4 days | 🔲 Not Started |
 | 2B | Push Notifications | 5-7 days | 🔲 Not Started |
 | 3A | STT Voice Input | 4-5 days | 🔲 Not Started |
@@ -50,9 +50,9 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| A01 | Define TypeScript interfaces for assessments | 🔲 | Backend types |
-| A02 | Add Zod validation schema for assessments | 🔲 | |
-| A03 | Create Prisma migration for assessments | 🔲 | Agent.assessmentConfigs, AssessmentResponse |
+| A01 | Define TypeScript interfaces for assessments | ✅ | Backend types |
+| A02 | Add Zod validation schema for assessments | ✅ | |
+| A03 | Create Prisma migration for assessments | ✅ | Agent.assessmentConfigs, AssessmentResponse |
 | A04 | Seed example "Wheel of Life" assessment | 🔲 | prisma/seed.ts |
 | A05 | Create assessments routes file | 🔲 | `/backend/src/routes/assessments.ts` |
 | A06 | Implement GET /agents/:id/assessments | 🔲 | |
