@@ -21,6 +21,7 @@ export default function RootLayout() {
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasSeenWelcome = useAuthStore((state) => state.hasSeenWelcome);
+  const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
 
   // Load Inter font family
   const [fontsLoaded] = useFonts({
@@ -50,18 +51,25 @@ export default function RootLayout() {
     if (!isInitialized) return;
 
     const inWelcomeGroup = segments[0] === '(welcome)';
+    const inOnboarding = segments[1] === 'onboarding';
 
     // Show welcome screen for first-time unauthenticated users
     const shouldShowWelcome = !isAuthenticated && !hasSeenWelcome;
 
+    // New users who just signed up need to complete onboarding
+    const needsOnboarding = isAuthenticated && !hasCompletedOnboarding;
+
     if (shouldShowWelcome && !inWelcomeGroup) {
       // Redirect to welcome screen
       router.replace('/(welcome)');
-    } else if (!shouldShowWelcome && inWelcomeGroup) {
+    } else if (needsOnboarding && !inOnboarding) {
+      // Redirect new authenticated users to onboarding
+      router.replace('/(welcome)/onboarding');
+    } else if (!shouldShowWelcome && !needsOnboarding && inWelcomeGroup) {
       // Redirect away from welcome screen to tabs
       router.replace('/(tabs)');
     }
-  }, [isInitialized, isAuthenticated, hasSeenWelcome, segments]);
+  }, [isInitialized, isAuthenticated, hasSeenWelcome, hasCompletedOnboarding, segments]);
 
   if (!fontsLoaded || !isInitialized) {
     return null;

@@ -13,6 +13,9 @@ interface User {
   subscriptionTier: 'FREE' | 'PREMIUM' | 'CREATOR';
   subscriptionExpiry?: string;
   context?: any;
+  hasCompletedOnboarding?: boolean;
+  contextLastUpdatedAt?: string;
+  contextNudgeDismissedAt?: string;
 }
 
 interface Subscription {
@@ -28,6 +31,7 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   hasSeenWelcome: boolean;
+  hasCompletedOnboarding: boolean;
 
   // Computed getters
   isAuthenticated: boolean;
@@ -48,6 +52,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   subscription: null,
   isLoading: true,
   isInitialized: false,
+  hasCompletedOnboarding: false,
   hasSeenWelcome: false,
   isAuthenticated: false,
   isPremium: false,
@@ -79,6 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               subscription,
               isAuthenticated: true,
               isPremium: subscription?.isPremium || false,
+              hasCompletedOnboarding: (fullUser as any)?.hasCompletedOnboarding || false,
             });
           } catch (error) {
             // If API call fails, still set basic user info from auth service
@@ -88,6 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               subscription: null,
               isAuthenticated: true,
               isPremium: false,
+              hasCompletedOnboarding: false,
             });
           }
 
@@ -144,9 +151,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         subscription,
         isAuthenticated: true,
         isPremium: subscription?.isPremium || false,
+        // New users start with hasCompletedOnboarding: false
+        hasCompletedOnboarding: false,
       });
 
-      // Mark welcome as seen (user has completed onboarding)
+      // Mark welcome as seen (so they don't see the welcome screen again)
       await authService.setHasSeenWelcome(true);
       set({ hasSeenWelcome: true });
 
@@ -169,6 +178,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         subscription,
         isAuthenticated: true,
         isPremium: subscription?.isPremium || false,
+        hasCompletedOnboarding: (fullUser as any)?.hasCompletedOnboarding || false,
       });
 
       // Mark welcome as seen (user has completed onboarding)
@@ -187,7 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.logout();
       await revenuecat.logoutUser();
-      set({ user: null, subscription: null, isAuthenticated: false, isPremium: false });
+      set({ user: null, subscription: null, isAuthenticated: false, isPremium: false, hasCompletedOnboarding: false });
     } finally {
       set({ isLoading: false });
     }
@@ -201,6 +211,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         subscription,
         isAuthenticated: !!user,
         isPremium: subscription?.isPremium || false,
+        hasCompletedOnboarding: (user as any)?.hasCompletedOnboarding || false,
       });
     } catch (error) {
       console.error('Error refreshing user:', error);
