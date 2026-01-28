@@ -53,7 +53,7 @@
 | A01 | Define TypeScript interfaces for assessments | ✅ | Backend types |
 | A02 | Add Zod validation schema for assessments | ✅ | |
 | A03 | Create Prisma migration for assessments | ✅ | Agent.assessmentConfigs, AssessmentResponse |
-| A04 | Seed example "Wheel of Life" assessment | 🔲 | prisma/seed.ts |
+| A04 | Seed example "Wheel of Life" assessment | ✅ | prisma/seed.ts |
 | A05 | Create assessments routes file | 🔲 | `/backend/src/routes/assessments.ts` |
 | A06 | Implement GET /agents/:id/assessments | 🔲 | |
 | A07 | Implement POST /agents/:id/assessments | 🔲 | Creator only |

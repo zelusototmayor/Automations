@@ -1,7 +1,83 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
+
+// ============================================
+// WHEEL OF LIFE ASSESSMENT TEMPLATE
+// ============================================
+
+const wheelOfLifeAssessment = {
+  id: randomUUID(),
+  name: 'Wheel of Life',
+  description: 'Rate your satisfaction in key life areas to identify where to focus your growth.',
+  triggerType: 'first_message' as const,
+  questions: [
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your career and professional growth?',
+      type: 'scale_1_10' as const,
+      category: 'Career',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your financial situation?',
+      type: 'scale_1_10' as const,
+      category: 'Finances',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your health and fitness?',
+      type: 'scale_1_10' as const,
+      category: 'Health',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your personal relationships?',
+      type: 'scale_1_10' as const,
+      category: 'Relationships',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your personal growth and learning?',
+      type: 'scale_1_10' as const,
+      category: 'Personal Growth',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your fun and recreation?',
+      type: 'scale_1_10' as const,
+      category: 'Fun & Recreation',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your physical environment (home, workspace)?',
+      type: 'scale_1_10' as const,
+      category: 'Environment',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'How satisfied are you with your contribution to community or society?',
+      type: 'scale_1_10' as const,
+      category: 'Contribution',
+      required: true,
+    },
+    {
+      id: randomUUID(),
+      text: 'Which area would you most like to focus on improving?',
+      type: 'open_text' as const,
+      required: false,
+    },
+  ],
+};
 
 async function main() {
   console.log('Seeding database...');
@@ -124,6 +200,7 @@ Remember to breathe and create space in your responses. You're not in a rush.`,
         'Guide me through a breathing exercise',
         'Help me process a difficult emotion',
       ],
+      assessmentConfigs: [wheelOfLifeAssessment],
       isPublished: true,
       usageCount: 89,
       ratingAvg: 4.9,
