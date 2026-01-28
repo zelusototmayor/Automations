@@ -24,6 +24,11 @@ model User {
   // Personal context for coaching
   context       Json?     @default("{}")
 
+  // Onboarding & context tracking
+  hasCompletedOnboarding    Boolean   @default(false) @map("has_completed_onboarding")
+  contextLastUpdatedAt      DateTime? @map("context_last_updated_at")
+  contextNudgeDismissedAt   DateTime? @map("context_nudge_dismissed_at")
+
   // Subscription info
   subscriptionTier   SubscriptionTier @default(FREE) @map("subscription_tier")
   subscriptionExpiry DateTime?        @map("subscription_expiry")
