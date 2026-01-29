@@ -37,22 +37,16 @@ function getGoogleClient(): GoogleGenerativeAI {
 // Supported models configuration
 // Pricing per million tokens (input/output):
 // Claude Haiku 4.5: $1/$5 | Sonnet 4.5: $3/$15 | Opus 4.5: $5/$25
-// GPT-4o mini: $0.15/$0.60 | GPT-5 mini: Fast & cheap | GPT-5.2: Latest flagship
+// GPT-5.2: Latest flagship
 export const SUPPORTED_MODELS: Record<LLMProvider, Array<{ id: string; name: string; recommended?: boolean }>> = {
   anthropic: [
-    { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5 (Balanced)', recommended: true },
-    { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Fastest, Cheapest)' },
-    { id: 'claude-opus-4-20250514', name: 'Claude Opus 4.5 (Most Capable)' },
+    { id: 'claude-sonnet-4-5-20250929', name: 'Claude (Latest)', recommended: true },
   ],
   openai: [
-    { id: 'gpt-5.2', name: 'GPT-5.2 (Latest Flagship)', recommended: true },
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Cheapest)' },
-    { id: 'gpt-5-mini', name: 'GPT-5 Mini (Fast & Cheap)' },
-    { id: 'gpt-5', name: 'GPT-5' },
+    { id: 'gpt-5.2', name: 'GPT (Latest)', recommended: true },
   ],
   google: [
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', recommended: true },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (faster)' },
+    { id: 'gemini-2.5-flash', name: 'Gemini (Latest)', recommended: true },
   ],
 };
 
@@ -86,7 +80,8 @@ export function buildSystemPrompt(
   agent: Agent & { user_insights_prompt?: string | null },
   userContext?: UserContext | null,
   retrievedKnowledge?: RetrievedChunk[] | null,
-  assessmentResults?: AssessmentResultForPrompt[] | null
+  assessmentResults?: AssessmentResultForPrompt[] | null,
+  voiceMode?: boolean
 ): string {
   let prompt = agent.system_prompt;
 
@@ -206,6 +201,37 @@ export function buildSystemPrompt(
     }
   }
 
+  // Voice mode instructions for conversational responses
+  if (voiceMode) {
+    prompt += `\n\n## IMPORTANT: Voice Conversation Mode\n`;
+    prompt += `The user is speaking to you via voice. Your response will be read aloud by text-to-speech.\n\n`;
+    prompt += `Adjust your response style for natural spoken conversation:\n`;
+    prompt += `- Write in a conversational, flowing manner as if speaking naturally\n`;
+    prompt += `- NEVER use markdown formatting (no **, no *, no bullet points, no numbered lists)\n`;
+    prompt += `- Instead of bullet points, use phrases like "First...", "Second...", "Another thing is..."\n`;
+    prompt += `- Instead of "**bold text**", just emphasize through word choice and phrasing\n`;
+    prompt += `- Keep sentences shorter and more digestible for listening\n`;
+    prompt += `- Use transitional phrases to connect ideas: "Now,", "Also,", "Here's the thing,"\n`;
+    prompt += `- Speak as if having a real conversation, not reading a document\n`;
+    prompt += `- It's okay to be slightly more casual and warm in tone\n\n`;
+    prompt += `### CRITICAL: Voice Timing and Pauses\n`;
+    prompt += `For proper pacing, INSERT pause markers where natural pauses should occur:\n`;
+    prompt += `- Use [pause 0.5s] for brief pauses (between phrases, short breaths)\n`;
+    prompt += `- Use [pause 1s] for medium pauses (between sentences, letting something sink in)\n`;
+    prompt += `- Use [pause 2s] for longer pauses (between sections, before important points)\n`;
+    prompt += `- Use [pause 3s] or [pause 4s] for extended pauses (meditations, breathing exercises, counting)\n\n`;
+    prompt += `Examples of good pause usage:\n`;
+    prompt += `- "Take a deep breath in... [pause 3s] and slowly exhale. [pause 3s] Now let's do that again."\n`;
+    prompt += `- "First, let me share something important. [pause 1s] The key to this is..."\n`;
+    prompt += `- "One. [pause 1s] Two. [pause 1s] Three. [pause 1s] Four. [pause 1s] Five."\n`;
+    prompt += `- "Let that thought settle for a moment. [pause 2s] How does that feel?"\n\n`;
+    prompt += `Be generous with pauses - they make spoken content feel natural and give the listener time to process. Use them especially for:\n`;
+    prompt += `- Breathing exercises and meditations (longer pauses)\n`;
+    prompt += `- After asking reflective questions\n`;
+    prompt += `- Before and after key points\n`;
+    prompt += `- Between different topics or sections\n`;
+  }
+
   return prompt;
 }
 
@@ -217,9 +243,10 @@ export async function* generateCoachResponse(
   messages: ChatMessage[],
   userContext?: UserContext | null,
   retrievedKnowledge?: RetrievedChunk[] | null,
-  assessmentResults?: AssessmentResultForPrompt[] | null
+  assessmentResults?: AssessmentResultForPrompt[] | null,
+  voiceMode?: boolean
 ): AsyncGenerator<string, void, unknown> {
-  const systemPrompt = buildSystemPrompt(agent, userContext, retrievedKnowledge, assessmentResults);
+  const systemPrompt = buildSystemPrompt(agent, userContext, retrievedKnowledge, assessmentResults, voiceMode);
   const { provider, model, temperature } = agent.model_config;
 
   switch (provider) {

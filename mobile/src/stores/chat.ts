@@ -20,7 +20,7 @@ interface ChatState {
   // Actions
   fetchConversations: () => Promise<void>;
   fetchConversation: (id: string) => Promise<void>;
-  sendMessage: (agentId: string, message: string, conversationId?: string) => Promise<string>;
+  sendMessage: (agentId: string, message: string, conversationId?: string, voiceMode?: boolean) => Promise<{ conversationId: string; response: string }>;
   deleteConversation: (id: string) => Promise<void>;
   clearCurrentConversation: () => void;
   startNewConversation: (agentId: string, greeting: string) => void;
@@ -63,7 +63,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (agentId: string, message: string, conversationId?: string) => {
+  sendMessage: async (agentId: string, message: string, conversationId?: string, voiceMode?: boolean) => {
     const userMessage: Message = {
       id: `temp-${Date.now()}`,
       conversation_id: conversationId || '',
@@ -89,7 +89,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
           set((state) => ({
             streamingContent: state.streamingContent + chunk,
           }));
-        }
+        },
+        voiceMode
       );
 
       // Add assistant message
@@ -117,7 +118,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }));
       }
 
-      return newConvId;
+      return { conversationId: newConvId, response: fullResponse };
     } catch (error: any) {
       // Remove optimistic user message on error
       set((state) => ({

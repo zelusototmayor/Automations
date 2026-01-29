@@ -67,6 +67,46 @@ interface TTSOptions {
   model?: string;
   stability?: number; // 0-1, lower = more expressive
   similarityBoost?: number; // 0-1, higher = closer to original voice
+  enableSSML?: boolean; // Enable SSML processing for pauses
+}
+
+/**
+ * Convert pause markers like [pause 2s] to SSML break tags
+ * Also wraps the entire text in speak tags for SSML processing
+ */
+export function convertPauseMarkersToSSML(text: string): string {
+  // Replace [pause Xs] or [pause X.Xs] with SSML break tags
+  // Supports formats: [pause 1s], [pause 2.5s], [pause 500ms]
+  let ssmlText = text.replace(
+    /\[pause\s+(\d+(?:\.\d+)?)(s|ms)?\]/gi,
+    (match, duration, unit) => {
+      // Default to seconds if no unit specified
+      const timeUnit = unit?.toLowerCase() || 's';
+      if (timeUnit === 'ms') {
+        return `<break time="${duration}ms"/>`;
+      }
+      return `<break time="${duration}s"/>`;
+    }
+  );
+
+  // Also support alternative formats: [pause: 2s], (pause 2s), ...pause 2s...
+  ssmlText = ssmlText.replace(
+    /\[pause:\s*(\d+(?:\.\d+)?)(s|ms)?\]/gi,
+    (match, duration, unit) => {
+      const timeUnit = unit?.toLowerCase() || 's';
+      return `<break time="${duration}${timeUnit}"/>`;
+    }
+  );
+
+  // Wrap in SSML speak tags
+  return `<speak>${ssmlText}</speak>`;
+}
+
+/**
+ * Check if text contains pause markers that need SSML processing
+ */
+export function hasPauseMarkers(text: string): boolean {
+  return /\[pause[\s:]+\d+(?:\.\d+)?(?:s|ms)?\]/i.test(text);
 }
 
 /**
@@ -79,6 +119,8 @@ export function isTTSConfigured(): boolean {
 /**
  * Synthesize speech from text using ElevenLabs API
  * Returns audio as a Buffer (mp3 format)
+ *
+ * Automatically detects pause markers like [pause 2s] and converts to SSML
  */
 export async function synthesizeSpeech(
   text: string,
@@ -90,9 +132,22 @@ export async function synthesizeSpeech(
   }
 
   const voiceId = options.voiceId || ELEVENLABS_VOICES[DEFAULT_VOICE_ID].id;
-  const model = options.model || ELEVENLABS_MODELS.turbo_v2;
   const stability = options.stability ?? 0.5;
   const similarityBoost = options.similarityBoost ?? 0.8;
+
+  // Check if text contains pause markers and needs SSML processing
+  const needsSSML = options.enableSSML !== false && hasPauseMarkers(text);
+
+  // Use multilingual_v2 model for SSML as it has better support
+  // Otherwise use the specified model or turbo for speed
+  const model = needsSSML
+    ? ELEVENLABS_MODELS.multilingual_v2
+    : (options.model || ELEVENLABS_MODELS.turbo_v2);
+
+  // Convert pause markers to SSML if needed
+  const processedText = needsSSML ? convertPauseMarkersToSSML(text) : text;
+
+  console.log(`TTS: SSML=${needsSSML}, model=${model}, text length=${text.length}`);
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -104,7 +159,7 @@ export async function synthesizeSpeech(
         'xi-api-key': apiKey,
       },
       body: JSON.stringify({
-        text,
+        text: processedText,
         model_id: model,
         voice_settings: {
           stability,
@@ -127,6 +182,8 @@ export async function synthesizeSpeech(
 /**
  * Stream speech synthesis (for lower latency)
  * Returns a readable stream of audio chunks
+ *
+ * Automatically detects pause markers like [pause 2s] and converts to SSML
  */
 export async function synthesizeSpeechStream(
   text: string,
@@ -138,9 +195,19 @@ export async function synthesizeSpeechStream(
   }
 
   const voiceId = options.voiceId || ELEVENLABS_VOICES[DEFAULT_VOICE_ID].id;
-  const model = options.model || ELEVENLABS_MODELS.turbo_v2;
   const stability = options.stability ?? 0.5;
   const similarityBoost = options.similarityBoost ?? 0.8;
+
+  // Check if text contains pause markers and needs SSML processing
+  const needsSSML = options.enableSSML !== false && hasPauseMarkers(text);
+
+  // Use multilingual_v2 model for SSML as it has better support
+  const model = needsSSML
+    ? ELEVENLABS_MODELS.multilingual_v2
+    : (options.model || ELEVENLABS_MODELS.turbo_v2);
+
+  // Convert pause markers to SSML if needed
+  const processedText = needsSSML ? convertPauseMarkersToSSML(text) : text;
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
@@ -152,7 +219,7 @@ export async function synthesizeSpeechStream(
         'xi-api-key': apiKey,
       },
       body: JSON.stringify({
-        text,
+        text: processedText,
         model_id: model,
         voice_settings: {
           stability,
@@ -225,9 +292,12 @@ export async function getAvailableVoices(): Promise<Array<{
 
 /**
  * Estimate character count for billing purposes
+ * Excludes pause markers since they're converted to SSML and not spoken
  */
 export function estimateCharacterCount(text: string): number {
-  return text.length;
+  // Remove pause markers before counting
+  const cleanText = text.replace(/\[pause[\s:]*\d+(?:\.\d+)?(?:s|ms)?\]/gi, '');
+  return cleanText.length;
 }
 
 /**

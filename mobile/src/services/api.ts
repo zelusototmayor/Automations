@@ -114,7 +114,8 @@ export async function sendMessage(
   agentId: string,
   message: string,
   conversationId?: string,
-  onChunk?: (chunk: string) => void
+  onChunk?: (chunk: string) => void,
+  voiceMode?: boolean
 ): Promise<{ conversationId: string; fullResponse: string }> {
   const headers = await getAuthHeaders();
 
@@ -125,6 +126,7 @@ export async function sendMessage(
       agent_id: agentId,
       conversation_id: conversationId,
       message,
+      voice_mode: voiceMode,
     }),
   });
 
@@ -134,7 +136,7 @@ export async function sendMessage(
       const newTokens = await refreshAccessToken();
       if (newTokens) {
         // Retry with new token
-        return sendMessage(agentId, message, conversationId, onChunk);
+        return sendMessage(agentId, message, conversationId, onChunk, voiceMode);
       }
     }
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
@@ -297,7 +299,7 @@ export async function linkRevenueCat(revenueCatId: string): Promise<{ user: User
 // TTS API
 // ============================================
 
-export async function synthesizeSpeech(text: string, agentId?: string): Promise<string> {
+export async function synthesizeSpeech(text: string, agentId?: string, voiceId?: string): Promise<string> {
   const token = await getAccessToken();
   if (!token) {
     throw new Error('Not authenticated');
@@ -309,7 +311,7 @@ export async function synthesizeSpeech(text: string, agentId?: string): Promise<
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ text, agentId }),
+    body: JSON.stringify({ text, agentId, voiceId }),
   });
 
   if (!response.ok) {
@@ -351,7 +353,7 @@ export async function updatePushToken(pushToken: string): Promise<{ success: boo
 // STT (Speech-to-Text) API
 // ============================================
 
-export async function transcribeAudio(audioBlob: Blob): Promise<{
+export async function transcribeAudio(audioUri: string): Promise<{
   text: string;
   language?: string;
   duration?: number;
@@ -361,8 +363,26 @@ export async function transcribeAudio(audioBlob: Blob): Promise<{
     throw new Error('Not authenticated');
   }
 
+  // Determine file extension from URI
+  const extension = audioUri.split('.').pop()?.toLowerCase() || 'm4a';
+  const mimeTypes: Record<string, string> = {
+    'm4a': 'audio/mp4',
+    'mp4': 'audio/mp4',
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav',
+    'webm': 'audio/webm',
+    'caf': 'audio/x-caf',
+    '3gp': 'audio/3gpp',
+  };
+  const mimeType = mimeTypes[extension] || 'audio/mp4';
+
+  // React Native FormData requires this format for file uploads
   const formData = new FormData();
-  formData.append('audio', audioBlob, 'audio.webm');
+  formData.append('audio', {
+    uri: audioUri,
+    type: mimeType,
+    name: `audio.${extension}`,
+  } as any);
 
   const response = await fetch(`${API_URL}/stt/transcribe`, {
     method: 'POST',

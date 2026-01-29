@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useChatStore } from '../../src/stores/chat';
@@ -25,6 +26,7 @@ import { StarRating, SessionCount } from '../../src/components/ui/Rating';
 import { AssessmentModal } from '../../src/components/assessments';
 import { AudioPlayer } from '../../src/components/AudioPlayer';
 import VoiceMode from '../../src/components/VoiceMode';
+import { parseMarkdown, stripPauseMarkers, type ParsedLine, type MarkdownSegment } from '../../src/utils/markdown';
 import type { Message, Agent, AssessmentConfig } from '../../src/types';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -61,6 +63,115 @@ function getAvatarGradient(name: string): [string, string] {
 // Helper to get greeting message (handles both camelCase and snake_case)
 function getGreetingMessage(agent: Agent): string {
   return (agent as any).greetingMessage || agent.greeting_message || '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MARKDOWN TEXT COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+function MarkdownText({
+  content,
+  isUser,
+}: {
+  content: string;
+  isUser: boolean;
+}) {
+  const textColor = isUser ? '#fff' : colors.textPrimary;
+  // Strip pause markers before parsing - they're only for TTS, not display
+  const cleanContent = stripPauseMarkers(content);
+  const parsed = parseMarkdown(cleanContent);
+
+  const renderSegment = (segment: MarkdownSegment, index: number) => {
+    switch (segment.type) {
+      case 'bold':
+        return (
+          <Text key={index} style={{ fontWeight: '700', color: textColor }}>
+            {segment.content}
+          </Text>
+        );
+      case 'italic':
+        return (
+          <Text key={index} style={{ fontStyle: 'italic', color: textColor }}>
+            {segment.content}
+          </Text>
+        );
+      case 'bolditalic':
+        return (
+          <Text key={index} style={{ fontWeight: '700', fontStyle: 'italic', color: textColor }}>
+            {segment.content}
+          </Text>
+        );
+      case 'code':
+        return (
+          <Text
+            key={index}
+            style={{
+              fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+              backgroundColor: isUser ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)',
+              color: textColor,
+              paddingHorizontal: 4,
+              borderRadius: 4,
+            }}
+          >
+            {segment.content}
+          </Text>
+        );
+      default:
+        return (
+          <Text key={index} style={{ color: textColor }}>
+            {segment.content}
+          </Text>
+        );
+    }
+  };
+
+  const renderLine = (line: ParsedLine, index: number) => {
+    const lineStyle = { lineHeight: 22, marginBottom: 4 };
+
+    switch (line.type) {
+      case 'listItem':
+        return (
+          <View key={index} style={{ flexDirection: 'row', marginBottom: 4 }}>
+            <Text style={{ color: textColor, marginRight: 8 }}>•</Text>
+            <Text style={{ flex: 1, lineHeight: 22, color: textColor }}>
+              {line.segments.map(renderSegment)}
+            </Text>
+          </View>
+        );
+      case 'numberedItem':
+        return (
+          <View key={index} style={{ flexDirection: 'row', marginBottom: 4 }}>
+            <Text style={{ color: textColor, marginRight: 8 }}>{line.number}.</Text>
+            <Text style={{ flex: 1, lineHeight: 22, color: textColor }}>
+              {line.segments.map(renderSegment)}
+            </Text>
+          </View>
+        );
+      case 'header':
+        return (
+          <Text
+            key={index}
+            style={{
+              ...lineStyle,
+              fontWeight: '700',
+              fontSize: line.level === 1 ? 18 : line.level === 2 ? 16 : 15,
+              color: textColor,
+              marginTop: index > 0 ? 8 : 0,
+            }}
+          >
+            {line.segments.map(renderSegment)}
+          </Text>
+        );
+      default:
+        return (
+          <Text key={index} style={{ ...lineStyle, color: textColor }}>
+            {line.segments.map(renderSegment)}
+          </Text>
+        );
+    }
+  };
+
+  return <View>{parsed.map(renderLine)}</View>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -102,15 +213,21 @@ function MessageBubble({
           </View>
         ) : (
           <>
-            <Text
-              className={`text-body ${isUser ? 'text-white' : ''}`}
-              style={{ lineHeight: 22, color: isUser ? '#fff' : colors.textPrimary }}
-            >
-              {message.content}
-              {isStreaming && message.content && (
-                <Text style={{ color: colors.sage }}>▊</Text>
-              )}
-            </Text>
+            {isUser ? (
+              // User messages - plain text
+              <Text
+                className="text-body text-white"
+                style={{ lineHeight: 22 }}
+              >
+                {message.content}
+              </Text>
+            ) : (
+              // Assistant messages - render markdown
+              <MarkdownText content={message.content} isUser={false} />
+            )}
+            {isStreaming && message.content && (
+              <Text style={{ color: colors.sage }}>▊</Text>
+            )}
 
             {/* Audio play button for assistant messages */}
             {canPlayAudio && (
@@ -547,8 +664,8 @@ export default function ChatScreen() {
     setHasUserSentMessage(true);
 
     try {
-      const newConvId = await sendMessage(agentId!, text, conversationId);
-      setConversationId(newConvId);
+      const result = await sendMessage(agentId!, text, conversationId);
+      setConversationId(result.conversationId);
     } catch (error: any) {
       // Revert if error
       if (messages.length === 0) {
@@ -736,7 +853,7 @@ export default function ChatScreen() {
                 className="rounded-full w-11 h-11 items-center justify-center mr-2"
                 style={{ backgroundColor: colors.lavender }}
               >
-                <Text className="text-xl">🎙️</Text>
+                <Ionicons name="mic" size={22} color={colors.lavenderDark} />
               </Pressable>
               <Pressable
                 onPress={() => handleSend()}
@@ -775,14 +892,12 @@ export default function ChatScreen() {
           agentName={agent.name}
           agentAvatarUrl={agent.avatar_url}
           isPremium={isPremium}
-          onMessage={async (text: string) => {
-            // Send message and return response
+          onMessage={async (text: string, voiceMode?: boolean) => {
+            // Send message with voiceMode flag for conversational response
             setHasUserSentMessage(true);
-            const newConvId = await sendMessage(agentId!, text, conversationId);
-            setConversationId(newConvId);
-            // Return the last assistant message
-            const lastMessage = messages[messages.length - 1];
-            return lastMessage?.role === 'assistant' ? lastMessage.content : '';
+            const result = await sendMessage(agentId!, text, conversationId, voiceMode);
+            setConversationId(result.conversationId);
+            return result.response;
           }}
           onClose={() => setShowVoiceMode(false)}
         />
@@ -815,12 +930,12 @@ export default function ChatScreen() {
               // Send the pending message if any
               if (pendingMessageAfterAssessment) {
                 setHasUserSentMessage(true);
-                const newConvId = await sendMessage(
+                const result = await sendMessage(
                   agentId!,
                   pendingMessageAfterAssessment,
                   conversationId
                 );
-                setConversationId(newConvId);
+                setConversationId(result.conversationId);
                 setPendingMessageAfterAssessment(null);
               }
             } catch (error) {
