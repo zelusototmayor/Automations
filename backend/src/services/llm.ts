@@ -68,13 +68,25 @@ interface KnowledgeContextDoc {
   content: string;
 }
 
+// Interface for assessment responses with question context
+export interface AssessmentResultForPrompt {
+  assessmentName: string;
+  answers: Array<{
+    question: string;
+    questionType: 'scale_1_10' | 'multiple_choice' | 'open_text';
+    category?: string;
+    answer: string | number;
+  }>;
+}
+
 /**
- * Build the complete system prompt with user context and retrieved knowledge
+ * Build the complete system prompt with user context, assessment results, and retrieved knowledge
  */
 export function buildSystemPrompt(
   agent: Agent,
   userContext?: UserContext | null,
-  retrievedKnowledge?: RetrievedChunk[] | null
+  retrievedKnowledge?: RetrievedChunk[] | null,
+  assessmentResults?: AssessmentResultForPrompt[] | null
 ): string {
   let prompt = agent.system_prompt;
 
@@ -124,6 +136,63 @@ export function buildSystemPrompt(
     prompt += `\nUse this context to personalize your coaching. Reference their values and goals when relevant.`;
   }
 
+  // Inject assessment results if available
+  if (assessmentResults && assessmentResults.length > 0) {
+    prompt += `\n\n## Assessment Results\n`;
+    prompt += `The person has completed the following assessments. Use these insights to `;
+    prompt += `personalize your coaching and provide targeted advice.\n\n`;
+
+    for (const assessment of assessmentResults) {
+      prompt += `### ${assessment.assessmentName}\n`;
+
+      // Group by category if categories exist
+      const categories = new Map<string, typeof assessment.answers>();
+      const uncategorized: typeof assessment.answers = [];
+
+      for (const answer of assessment.answers) {
+        if (answer.category) {
+          const existing = categories.get(answer.category) || [];
+          existing.push(answer);
+          categories.set(answer.category, existing);
+        } else {
+          uncategorized.push(answer);
+        }
+      }
+
+      // Output categorized answers
+      for (const [category, answers] of categories) {
+        prompt += `\n**${category}:**\n`;
+        for (const a of answers) {
+          if (a.questionType === 'scale_1_10') {
+            const score = a.answer as number;
+            const level = score <= 3 ? 'Low' : score <= 6 ? 'Moderate' : 'High';
+            prompt += `- ${a.question}: ${score}/10 (${level})\n`;
+          } else {
+            prompt += `- ${a.question}: ${a.answer}\n`;
+          }
+        }
+      }
+
+      // Output uncategorized answers
+      if (uncategorized.length > 0) {
+        for (const a of uncategorized) {
+          if (a.questionType === 'scale_1_10') {
+            const score = a.answer as number;
+            const level = score <= 3 ? 'Low' : score <= 6 ? 'Moderate' : 'High';
+            prompt += `- ${a.question}: ${score}/10 (${level})\n`;
+          } else {
+            prompt += `- ${a.question}: ${a.answer}\n`;
+          }
+        }
+      }
+
+      prompt += '\n';
+    }
+
+    prompt += `Reference these assessment results naturally when providing coaching. `;
+    prompt += `Focus especially on areas with lower scores as potential growth opportunities.`;
+  }
+
   // Add example conversations as few-shot examples
   if (agent.example_conversations?.length) {
     prompt += `\n\n## Example Conversations\n`;
@@ -142,9 +211,10 @@ export async function* generateCoachResponse(
   agent: Agent,
   messages: ChatMessage[],
   userContext?: UserContext | null,
-  retrievedKnowledge?: RetrievedChunk[] | null
+  retrievedKnowledge?: RetrievedChunk[] | null,
+  assessmentResults?: AssessmentResultForPrompt[] | null
 ): AsyncGenerator<string, void, unknown> {
-  const systemPrompt = buildSystemPrompt(agent, userContext, retrievedKnowledge);
+  const systemPrompt = buildSystemPrompt(agent, userContext, retrievedKnowledge, assessmentResults);
   const { provider, model, temperature } = agent.model_config;
 
   switch (provider) {
@@ -287,10 +357,11 @@ export async function generateCoachResponseSync(
   agent: Agent,
   messages: ChatMessage[],
   userContext?: UserContext | null,
-  retrievedKnowledge?: RetrievedChunk[] | null
+  retrievedKnowledge?: RetrievedChunk[] | null,
+  assessmentResults?: AssessmentResultForPrompt[] | null
 ): Promise<string> {
   let fullResponse = '';
-  for await (const chunk of generateCoachResponse(agent, messages, userContext, retrievedKnowledge)) {
+  for await (const chunk of generateCoachResponse(agent, messages, userContext, retrievedKnowledge, assessmentResults)) {
     fullResponse += chunk;
   }
   return fullResponse;

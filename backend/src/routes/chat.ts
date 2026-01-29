@@ -2,8 +2,9 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../services/database';
 import { authenticate } from '../middleware/auth';
 import { canSendMessage, recordFreeTrial } from '../services/subscription';
-import { generateCoachResponse, ChatMessage } from '../services/llm';
+import { generateCoachResponse, ChatMessage, AssessmentResultForPrompt } from '../services/llm';
 import { retrieveRelevantChunks, hasKnowledgeSources } from '../services/retrieval';
+import type { AssessmentConfig, AssessmentQuestion } from '../validation/assessments';
 
 const router = Router();
 
@@ -108,6 +109,48 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
       console.error('Error retrieving knowledge:', error);
     }
 
+    // Fetch assessment results for this user/agent
+    let assessmentResults: AssessmentResultForPrompt[] | null = null;
+    try {
+      const assessmentResponses = await prisma.assessmentResponse.findMany({
+        where: {
+          userId,
+          agentId: agent_id,
+        },
+        orderBy: { completedAt: 'desc' },
+        take: 5, // Limit to most recent 5 assessments
+      });
+
+      if (assessmentResponses.length > 0) {
+        // Get assessment configs from agent
+        const assessmentConfigs = (agent.assessmentConfigs as AssessmentConfig[]) || [];
+
+        assessmentResults = [];
+        for (const response of assessmentResponses) {
+          const config = assessmentConfigs.find((c) => c.id === response.assessmentId);
+          if (!config) continue;
+
+          const answers = response.answers as Record<string, string | number>;
+          const formattedAnswers: AssessmentResultForPrompt['answers'] = config.questions
+            .filter((q) => answers[q.id] !== undefined)
+            .map((q) => ({
+              question: q.text,
+              questionType: q.type,
+              category: q.category,
+              answer: answers[q.id],
+            }));
+
+          assessmentResults.push({
+            assessmentName: config.name,
+            answers: formattedAnswers,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching assessment results:', error);
+      // Continue without assessments
+    }
+
     // Set up streaming response
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -125,10 +168,11 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
         personality_config: agent.personalityConfig,
         model_config: agent.modelConfig,
         example_conversations: agent.exampleConversations,
+        knowledge_context: agent.knowledgeContext,
       };
 
       // Stream the response
-      for await (const chunk of generateCoachResponse(agentForLLM as any, messages, userContext as any, retrievedKnowledge)) {
+      for await (const chunk of generateCoachResponse(agentForLLM as any, messages, userContext as any, retrievedKnowledge, assessmentResults)) {
         fullResponse += chunk;
         res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
       }

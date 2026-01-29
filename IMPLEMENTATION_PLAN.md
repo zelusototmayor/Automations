@@ -8,7 +8,7 @@
 | Phase | Feature | Est. Time | Status |
 |-------|---------|-----------|--------|
 | 1A | User Context Onboarding | 2-3 days | ✅ Complete |
-| 1B | Structured Assessments | 3-5 days | 🔄 In Progress |
+| 1B | Structured Assessments | 3-5 days | ✅ Complete |
 | 2A | TTS Voice Output | 3-4 days | 🔲 Not Started |
 | 2B | Push Notifications | 5-7 days | 🔲 Not Started |
 | 3A | STT Voice Input | 4-5 days | 🔲 Not Started |
@@ -66,8 +66,8 @@
 | A14 | Create MultipleChoiceQuestion component | ✅ | |
 | A15 | Create OpenTextQuestion component | ✅ | |
 | A16 | Integrate AssessmentModal into chat screen | ✅ | Trigger on first message |
-| A17 | Add assessment step to creator wizard | 🔲 | New screen |
-| A18 | Extend buildSystemPrompt() with assessment results | 🔲 | In llm.ts |
+| A17 | Add assessment step to creator wizard | ❌ | Skipped - can add later |
+| A18 | Extend buildSystemPrompt() with assessment results | ✅ | In llm.ts |
 | A19 | Add mobile types for assessments | ✅ | `/mobile/src/types/index.ts` |
 
 **Validation:** Create coach with assessment → user chats → sees assessment → completes → coach references results
