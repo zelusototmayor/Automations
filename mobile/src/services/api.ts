@@ -335,3 +335,14 @@ export async function getTTSVoices(): Promise<{
 }> {
   return apiFetch('/tts/voices');
 }
+
+// ============================================
+// PUSH NOTIFICATIONS API
+// ============================================
+
+export async function updatePushToken(pushToken: string): Promise<{ success: boolean }> {
+  return apiFetch('/users/me/push-token', {
+    method: 'PATCH',
+    body: JSON.stringify({ push_token: pushToken }),
+  });
+}

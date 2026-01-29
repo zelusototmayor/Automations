@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -7,6 +7,13 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '../src/stores/auth';
 import VideoSplash from '../src/components/VideoSplash';
+import {
+  setupNotificationListeners,
+  registerForPushNotifications,
+  getLastNotificationResponse,
+  handleNotificationResponse,
+} from '../src/services/notifications';
+import { updatePushToken } from '../src/services/api';
 import '../global.css';
 
 // Keep splash screen visible while loading fonts
@@ -31,9 +38,52 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  // Track if we've registered push token this session
+  const hasRegisteredPush = useRef(false);
+
   useEffect(() => {
     initialize();
   }, []);
+
+  // Set up push notification listeners
+  useEffect(() => {
+    const cleanup = setupNotificationListeners();
+    return cleanup;
+  }, []);
+
+  // Register for push notifications when authenticated
+  useEffect(() => {
+    if (!isAuthenticated || hasRegisteredPush.current) return;
+
+    const registerPush = async () => {
+      try {
+        const token = await registerForPushNotifications();
+        if (token) {
+          await updatePushToken(token);
+          hasRegisteredPush.current = true;
+          console.log('Push token registered with backend');
+        }
+      } catch (error) {
+        console.error('Error registering push notifications:', error);
+      }
+    };
+
+    registerPush();
+  }, [isAuthenticated]);
+
+  // Handle notification tap from cold start
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const handleColdStart = async () => {
+      const response = await getLastNotificationResponse();
+      if (response) {
+        handleNotificationResponse(response);
+      }
+    };
+
+    handleColdStart();
+  }, [isInitialized]);
 
   // Hide splash screen when fonts and auth are ready
   const onLayoutRootView = useCallback(async () => {

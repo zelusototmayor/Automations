@@ -202,6 +202,40 @@ router.post('/me/dismiss-context-nudge', authenticate, async (req: Request, res:
 });
 
 /**
+ * PATCH /users/me/push-token - Update push notification token
+ */
+router.patch('/me/push-token', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { push_token } = req.body;
+
+    if (!push_token || typeof push_token !== 'string') {
+      res.status(400).json({ error: 'Missing or invalid push_token' });
+      return;
+    }
+
+    // Validate Expo push token format (ExponentPushToken[xxx])
+    if (!push_token.startsWith('ExponentPushToken[')) {
+      res.status(400).json({ error: 'Invalid push token format' });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        pushToken: push_token,
+        pushTokenUpdatedAt: new Date(),
+      },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating push token:', error);
+    res.status(500).json({ error: 'Failed to update push token' });
+  }
+});
+
+/**
  * POST /users/me/revenuecat - Link RevenueCat user ID
  */
 router.post('/me/revenuecat', authenticate, async (req: Request, res: Response) => {

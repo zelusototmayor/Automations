@@ -29,6 +29,11 @@ model User {
   contextLastUpdatedAt      DateTime? @map("context_last_updated_at")
   contextNudgeDismissedAt   DateTime? @map("context_nudge_dismissed_at")
 
+  // Push notifications
+  pushToken               String?   @map("push_token")
+  pushTokenUpdatedAt      DateTime? @map("push_token_updated_at")
+  notificationPreferences Json?     @default("{}") @map("notification_preferences")
+
   // Subscription info
   subscriptionTier   SubscriptionTier @default(FREE) @map("subscription_tier")
   subscriptionExpiry DateTime?        @map("subscription_expiry")

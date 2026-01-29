@@ -10,7 +10,7 @@
 | 1A | User Context Onboarding | 2-3 days | ✅ Complete |
 | 1B | Structured Assessments | 3-5 days | ✅ Complete |
 | 2A | TTS Voice Output | 3-4 days | ✅ Complete |
-| 2B | Push Notifications | 5-7 days | 🔲 Not Started |
+| 2B | Push Notifications | 5-7 days | ✅ Core Complete |
 | 3A | STT Voice Input | 4-5 days | 🔲 Not Started |
 | 3B | AI-Extracted Insights | 5-7 days | 🔲 Not Started |
 
@@ -108,31 +108,31 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P01 | Install expo-notifications | 🔲 | `npx expo install expo-notifications` |
-| P02 | Configure app.json permissions | 🔲 | |
-| P03 | Create notifications service (mobile) | 🔲 | `/mobile/src/services/notifications.ts` |
-| P04 | Implement permission request flow | 🔲 | |
-| P05 | Implement push token registration | 🔲 | |
-| P06 | Add pushToken to User schema | 🔲 | Prisma migration |
-| P07 | Create push token API endpoint | 🔲 | PATCH /users/me/push-token |
-| P08 | Send push token from mobile | 🔲 | On permission grant |
-| P09 | Add bull and ioredis dependencies | 🔲 | Backend |
-| P10 | Create Redis connection config | 🔲 | |
-| P11 | Create job queue setup | 🔲 | `/backend/src/jobs/queue.ts` |
-| P12 | Create Expo push service | 🔲 | `/backend/src/services/pushNotification.ts` |
-| P13 | Implement send notification function | 🔲 | |
-| P14 | Implement batch notifications | 🔲 | |
-| P15 | Handle push receipts | 🔲 | Mark invalid tokens |
-| P16 | Create ScheduledNotification schema | 🔲 | Prisma migration |
-| P17 | Create commitment detection service | 🔲 | LLM-based |
-| P18 | Integrate commitment detection into chat | 🔲 | After each message |
-| P19 | Create notification scheduling logic | 🔲 | |
-| P20 | Create notification processor job | 🔲 | |
-| P21 | Create cron trigger for processor | 🔲 | Runs every minute |
-| P22 | Add notificationPreferences to User | 🔲 | |
-| P23 | Create notification settings screen | 🔲 | `/mobile/app/settings/notifications.tsx` |
-| P24 | Implement quiet hours logic | 🔲 | |
-| P25 | Handle notification tap navigation | 🔲 | Deep link to chat |
+| P01 | Install expo-notifications | ✅ | `npx expo install expo-notifications` |
+| P02 | Configure app.json permissions | ✅ | Added expo-notifications plugin |
+| P03 | Create notifications service (mobile) | ✅ | `/mobile/src/services/notifications.ts` |
+| P04 | Implement permission request flow | ✅ | |
+| P05 | Implement push token registration | ✅ | |
+| P06 | Add pushToken to User schema | ✅ | Added pushToken, pushTokenUpdatedAt, notificationPreferences |
+| P07 | Create push token API endpoint | ✅ | PATCH /users/me/push-token |
+| P08 | Send push token from mobile | ✅ | On permission grant in _layout.tsx |
+| P09 | Add bull and ioredis dependencies | ❌ | Skipped - not essential for MVP |
+| P10 | Create Redis connection config | ❌ | Skipped - not essential for MVP |
+| P11 | Create job queue setup | ❌ | Skipped - not essential for MVP |
+| P12 | Create Expo push service | ✅ | `/backend/src/services/pushNotification.ts` |
+| P13 | Implement send notification function | ✅ | sendPushNotification() |
+| P14 | Implement batch notifications | ✅ | sendBatchPushNotifications() |
+| P15 | Handle push receipts | ✅ | Invalid tokens auto-removed |
+| P16 | Create ScheduledNotification schema | ❌ | Skipped - can add later |
+| P17 | Create commitment detection service | ❌ | Skipped - can add later |
+| P18 | Integrate commitment detection into chat | ❌ | Skipped - can add later |
+| P19 | Create notification scheduling logic | ❌ | Skipped - can add later |
+| P20 | Create notification processor job | ❌ | Skipped - can add later |
+| P21 | Create cron trigger for processor | ❌ | Skipped - can add later |
+| P22 | Add notificationPreferences to User | ✅ | Added in schema |
+| P23 | Create notification settings screen | ❌ | Skipped - can add later |
+| P24 | Implement quiet hours logic | ❌ | Skipped - can add later |
+| P25 | Handle notification tap navigation | ✅ | Deep link to chat via handleNotificationResponse |
 
 **Validation:** Make commitment in chat → receive notification next day → tap opens chat
 
