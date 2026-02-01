@@ -21,8 +21,12 @@ proxy:
   app_port: 3001
   healthcheck:
     path: /
-    interval: 10
-    timeout: 5
+    interval: 5
+    timeout: 10
+
+# Extended boot timeout for Next.js startup
+boot:
+  limit: 90
 
 registry:
   username: zelusottomayor
@@ -46,7 +50,3 @@ builder:
 # SSH options
 ssh:
   user: root
-
-# Boot timeout
-boot:
-  limit: 60
