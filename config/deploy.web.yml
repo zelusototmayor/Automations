@@ -10,8 +10,8 @@ servers:
     hosts:
       - 143.110.169.251
     options:
-      cpus: "0.50"
-      memory: "512m"
+      cpus: "1.0"
+      memory: "1024m"
 
 proxy:
   ssl: true
@@ -26,7 +26,7 @@ proxy:
 
 # Extended boot timeout for Next.js startup
 boot:
-  limit: 90
+  limit: 120
 
 registry:
   username: zelusottomayor
