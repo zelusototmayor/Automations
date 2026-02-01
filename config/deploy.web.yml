@@ -19,10 +19,11 @@ proxy:
     - bettercoachingapp.com
     - www.bettercoachingapp.com
   app_port: 3001
+  deploy_timeout: 120s
   healthcheck:
     path: /
     interval: 5
-    timeout: 10
+    timeout: 30
 
 # Extended boot timeout for Next.js startup
 boot:
