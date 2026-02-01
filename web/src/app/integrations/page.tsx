@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
 import { useAuthStore } from '@/lib/store';
@@ -55,7 +55,7 @@ const PROVIDERS = [
   },
 ];
 
-export default function IntegrationsPage() {
+function IntegrationsContent() {
   const { accessToken } = useAuthStore();
   const searchParams = useSearchParams();
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -142,7 +142,7 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <AppLayout>
+    <>
       <div className="mb-8">
         <h1 className="heading-section">
           Integrations
@@ -230,6 +230,20 @@ export default function IntegrationsPage() {
           })}
         </div>
       )}
+    </>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <AppLayout>
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 spinner"></div>
+        </div>
+      }>
+        <IntegrationsContent />
+      </Suspense>
     </AppLayout>
   );
 }
