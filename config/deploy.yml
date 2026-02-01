@@ -43,10 +43,10 @@ env:
     - REVENUECAT_WEBHOOK_SECRET
     - CORS_ORIGIN
 
-# PostgreSQL database (internal network only, no public port)
+# PostgreSQL database with pgvector (internal network only, no public port)
 accessories:
   db:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     host: 143.110.169.251
     env:
       clear:
