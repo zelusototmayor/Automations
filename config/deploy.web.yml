@@ -1,0 +1,53 @@
+# Kamal deployment configuration for Better Coaching Web (Next.js)
+service: bettercoaching-web
+
+# Docker image (will be pushed to Docker Hub)
+image: zelusottomayor/bettercoaching-web
+
+# Deploy to DigitalOcean droplet
+servers:
+  web:
+    hosts:
+      - 143.110.169.251
+    options:
+      cpus: "0.50"
+      memory: "512m"
+
+proxy:
+  ssl: true
+  hosts:
+    - bettercoachingapp.com
+    - www.bettercoachingapp.com
+  app_port: 3001
+  healthcheck:
+    path: /
+    interval: 10
+    timeout: 5
+
+registry:
+  username: zelusottomayor
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    NODE_ENV: production
+    PORT: "3001"
+    NEXT_PUBLIC_API_URL: https://api.bettercoachingapp.com
+  secret:
+    - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    - NEXT_PUBLIC_MIXPANEL_TOKEN
+
+# Builder configuration
+builder:
+  arch: amd64
+  context: ./web
+  dockerfile: Dockerfile
+
+# SSH options
+ssh:
+  user: root
+
+# Boot timeout
+boot:
+  limit: 60
