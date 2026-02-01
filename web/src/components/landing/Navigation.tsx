@@ -21,12 +21,14 @@ export function Navigation() {
             </span>
           </Link>
 
+{/* Sign in link hidden for now - uncomment when ready for public launch
           <Link
             href="/login"
             className="text-[15px] font-medium text-secondary hover:text-primary transition-colors"
           >
             Sign in
           </Link>
+          */}
         </div>
       </div>
     </nav>
