@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-01-28.clover',
-});
+// Lazy initialization to avoid build-time errors
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(key, {
+    apiVersion: '2024-12-18.acacia',
+  });
+}
 
 // Creator subscription price IDs - these will be created in Stripe Dashboard
 // For now, we'll create them dynamically
@@ -20,6 +27,7 @@ const CREATOR_PRICES = {
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripe();
     const { billingPeriod, userId, email } = await request.json();
 
     if (!billingPeriod || !['monthly', 'yearly'].includes(billingPeriod)) {
