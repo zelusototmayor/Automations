@@ -11,6 +11,7 @@ import { useAuthStore } from '../src/stores/auth';
 import VideoSplash from '../src/components/VideoSplash';
 import { OnboardingPromptModal } from '../src/components/OnboardingPromptModal';
 import { NotificationPermissionModal } from '../src/components/NotificationPermissionModal';
+import { UserIntentModal } from '../src/components/UserIntentModal';
 import {
   setupNotificationListeners,
   registerForPushNotifications,
@@ -43,6 +44,8 @@ export default function RootLayout() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasSeenWelcome = useAuthStore((state) => state.hasSeenWelcome);
   const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
+  const showUserIntentModal = useAuthStore((state) => state.showUserIntentModal);
+  const setShowUserIntentModal = useAuthStore((state) => state.setShowUserIntentModal);
 
   // Load Inter font family
   const [fontsLoaded] = useFonts({
@@ -158,6 +161,15 @@ export default function RootLayout() {
   const handleDismissNotifications = async () => {
     setShowNotificationPrompt(false);
     await SecureStore.setItemAsync(NOTIFICATION_PROMPT_SHOWN_KEY, 'true');
+  };
+
+  const handleSelectFindCoach = () => {
+    setShowUserIntentModal(false);
+  };
+
+  const handleSelectCreateCoach = () => {
+    setShowUserIntentModal(false);
+    // Browser is opened by the modal itself
   };
 
   // Hide splash screen when fonts and auth are ready
@@ -278,6 +290,13 @@ export default function RootLayout() {
           visible={showNotificationPrompt}
           onAllow={handleAllowNotifications}
           onDismiss={handleDismissNotifications}
+        />
+
+        {/* User Intent Modal (shown after signup) */}
+        <UserIntentModal
+          visible={showUserIntentModal}
+          onSelectFindCoach={handleSelectFindCoach}
+          onSelectCreateCoach={handleSelectCreateCoach}
         />
       </SafeAreaProvider>
     </GestureHandlerRootView>

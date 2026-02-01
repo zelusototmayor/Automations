@@ -4,6 +4,13 @@ import { create } from 'zustand';
 export type LLMProvider = 'anthropic' | 'openai' | 'google';
 export type CoachingApproach = 'socratic' | 'direct' | 'supportive' | 'adaptive';
 export type ResponseStyle = 'concise' | 'balanced' | 'detailed';
+export type PricingTier = 'tier_1' | 'tier_2' | 'tier_3';
+
+export const PRICING_TIERS: Record<PricingTier, { price: number; label: string; description: string }> = {
+  tier_1: { price: 7.99, label: 'Starter', description: 'Great for new coaches building an audience' },
+  tier_2: { price: 19.99, label: 'Professional', description: 'Most popular - balanced value for your expertise' },
+  tier_3: { price: 49.99, label: 'Premium', description: 'For specialized, high-value coaching' },
+};
 
 export interface PersonalityConfig {
   approach: CoachingApproach;
@@ -65,6 +72,9 @@ export interface AgentDraft {
   // Voice
   voiceId: string;
 
+  // Pricing
+  pricingTier: PricingTier;
+
   // Meta
   isPublished?: boolean;
 }
@@ -96,6 +106,7 @@ const DEFAULT_DRAFT: AgentDraft = {
   conversationStarters: [],
   exampleConversations: [],
   voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel - default
+  pricingTier: 'tier_2', // Professional - default
 };
 
 interface CreatorState {

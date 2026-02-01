@@ -1,7 +1,8 @@
 export { Navigation } from './Navigation';
 export { Hero } from './Hero';
-export { AppPreview } from './AppPreview';
+export { VideoPlaceholder } from './VideoPlaceholder';
+export { WaitlistModal } from './WaitlistModal';
 export { ValuePillars } from './ValuePillars';
 export { HowItWorks } from './HowItWorks';
-export { Categories } from './Categories';
+export { PlatformEconomy } from './PlatformEconomy';
 export { FooterCTA } from './FooterCTA';

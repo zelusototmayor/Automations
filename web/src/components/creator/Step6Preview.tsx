@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useCreatorStore, PROVIDERS, APPROACHES } from '@/lib/creatorStore';
+import { useCreatorStore, PROVIDERS, APPROACHES, PRICING_TIERS, PricingTier } from '@/lib/creatorStore';
 
 interface PreviewMessage {
   id: string;
@@ -16,7 +16,7 @@ const TEST_PROMPTS = [
 ];
 
 export function Step6Preview() {
-  const { draft } = useCreatorStore();
+  const { draft, setDraft } = useCreatorStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<PreviewMessage[]>([]);
@@ -129,7 +129,68 @@ export function Step6Preview() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
+    <div className="space-y-6">
+      {/* Pricing Selection */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          Set Your Price
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Choose how much users pay to subscribe to your coach. You&apos;ll earn 65% of each subscription.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(Object.entries(PRICING_TIERS) as [PricingTier, typeof PRICING_TIERS[PricingTier]][]).map(([tierId, tier]) => {
+            const isSelected = draft.pricingTier === tierId;
+            const earnings = (tier.price * 0.65).toFixed(2);
+
+            return (
+              <button
+                key={tierId}
+                onClick={() => setDraft({ pricingTier: tierId })}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  isSelected
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-sm font-medium ${
+                    isSelected ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {tier.label}
+                  </span>
+                  {isSelected && (
+                    <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  ${tier.price}<span className="text-sm font-normal text-gray-500">/mo</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {tier.description}
+                </p>
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    You earn: ${earnings}/subscriber
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            <strong>Revenue breakdown:</strong> You get 65% &bull; Apple takes 30% &bull; Platform fee 5%
+          </p>
+        </div>
+      </div>
+
+      {/* Chat Preview */}
+      <div className="flex flex-col h-[600px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
       {/* Coach Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center">
         <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center mr-3">
@@ -271,6 +332,7 @@ export function Step6Preview() {
             </span>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

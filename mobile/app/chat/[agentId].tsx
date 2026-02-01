@@ -20,7 +20,7 @@ import { useChatStore } from '../../src/stores/chat';
 import { useAgentsStore } from '../../src/stores/agents';
 import { useAuthStore } from '../../src/stores/auth';
 import * as api from '../../src/services/api';
-import { InfoIcon, XIcon, ChevronLeftIcon } from '../../src/components/ui/Icons';
+import { XIcon } from '../../src/components/ui/Icons';
 import { TierBadge, Badge } from '../../src/components/ui/Badge';
 import { StarRating, SessionCount } from '../../src/components/ui/Rating';
 import { AssessmentModal } from '../../src/components/assessments';
@@ -764,17 +764,15 @@ export default function ChatScreen() {
             <Pressable
               onPress={() => router.back()}
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 18,
                 backgroundColor: 'white',
                 borderWidth: 1,
                 borderColor: '#E5E7EB',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
-              <ChevronLeftIcon size={20} color={colors.textPrimary} />
+              <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '600' }}>Back</Text>
             </Pressable>
           ),
           headerRight: hasUserSentMessage
@@ -782,17 +780,15 @@ export default function ChatScreen() {
                 <Pressable
                   onPress={() => setShowInfoModal(true)}
                   style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 18,
                     backgroundColor: 'white',
                     borderWidth: 1,
                     borderColor: '#E5E7EB',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                 >
-                  <InfoIcon size={20} color={colors.textSecondary} />
+                  <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '600' }}>Info</Text>
                 </Pressable>
               )
             : undefined,

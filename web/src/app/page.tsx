@@ -8,7 +8,7 @@ import {
   Hero,
   ValuePillars,
   HowItWorks,
-  Categories,
+  PlatformEconomy,
   FooterCTA,
 } from '@/components/landing';
 
@@ -53,7 +53,7 @@ export default function Home() {
       <Hero />
       <ValuePillars />
       <HowItWorks />
-      <Categories />
+      <PlatformEconomy />
       <FooterCTA />
     </main>
   );

@@ -32,6 +32,7 @@ interface AuthState {
   isInitialized: boolean;
   hasSeenWelcome: boolean;
   hasCompletedOnboarding: boolean;
+  showUserIntentModal: boolean;
 
   // Computed getters
   isAuthenticated: boolean;
@@ -45,6 +46,7 @@ interface AuthState {
   refreshUser: () => Promise<void>;
   updateContext: (context: UserContext) => Promise<void>;
   setHasSeenWelcome: (seen: boolean) => Promise<void>;
+  setShowUserIntentModal: (show: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isInitialized: false,
   hasCompletedOnboarding: false,
   hasSeenWelcome: false,
+  showUserIntentModal: false,
   isAuthenticated: false,
   isPremium: false,
 
@@ -118,6 +121,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       } else {
         // Initialize RevenueCat anonymously
         await revenuecat.initializeRevenueCat();
+
+        // Reset hasSeenWelcome for non-authenticated users
+        // This ensures they always see the welcome screen when opening the app
+        await authService.setHasSeenWelcome(false);
+        set({ hasSeenWelcome: false });
       }
 
       // Listen for RevenueCat updates
@@ -153,6 +161,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isPremium: subscription?.isPremium || false,
         // New users start with hasCompletedOnboarding: false
         hasCompletedOnboarding: false,
+        // Show user intent modal for new signups
+        showUserIntentModal: true,
       });
 
       // Mark welcome as seen (so they don't see the welcome screen again)
@@ -233,5 +243,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setHasSeenWelcome: async (seen: boolean) => {
     await authService.setHasSeenWelcome(seen);
     set({ hasSeenWelcome: seen });
+  },
+
+  setShowUserIntentModal: (show: boolean) => {
+    set({ showUserIntentModal: show });
   },
 }));

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCreatorStore } from '../../src/stores/creator';
@@ -178,46 +178,42 @@ export default function EditCoachScreen() {
           headerTitle: 'Edit Coach',
           headerBackTitle: 'Cancel',
           headerLeft: () => (
-            <TouchableOpacity
+            <Pressable
               onPress={handleBack}
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                borderRadius: 20,
+                borderRadius: 18,
                 backgroundColor: 'white',
                 borderWidth: 1,
                 borderColor: '#E5E7EB',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
-              <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '500' }}>
+              <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '600' }}>
                 {currentStep > 1 ? 'Back' : 'Cancel'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ),
           headerRight: () => (
-            <TouchableOpacity
+            <Pressable
               onPress={handleSave}
               disabled={isSaving}
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                borderRadius: 20,
+                borderRadius: 18,
                 backgroundColor: 'white',
                 borderWidth: 1,
                 borderColor: '#E5E7EB',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: 60,
+                opacity: isSaving ? 0.5 : 1,
               }}
             >
               {isSaving ? (
                 <ActivityIndicator size="small" color="#4F6F5A" />
               ) : (
-                <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '500' }}>Save</Text>
+                <Text style={{ color: '#4F6F5A', fontSize: 14, fontWeight: '600' }}>Save</Text>
               )}
-            </TouchableOpacity>
+            </Pressable>
           ),
         }}
       />

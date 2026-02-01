@@ -1,10 +1,24 @@
 'use client';
 
-import Link from 'next/link';
+import { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { WaitlistModal } from './WaitlistModal';
 
 export function FooterCTA() {
   const { ref, isVisible } = useScrollReveal<HTMLElement>();
+  const [email, setEmail] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  const handleJoinWaitlist = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) return;
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setEmail('');
+  };
 
   return (
     <section ref={ref} className="section">
@@ -16,23 +30,32 @@ export function FooterCTA() {
         >
           <h2 className="heading-section">Ready to get started?</h2>
           <p className="mt-4 body-text text-lg">
-            Whether you want to share your expertise or find the guidance you need, we&apos;re here to help.
+            Whether you want to share your expertise or find the guidance you need, join the waitlist to be first in line.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/login"
-              className="btn btn-primary text-base px-8 py-3.5 w-full sm:w-auto"
+          {/* Waitlist Form */}
+          <form onSubmit={handleJoinWaitlist} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="w-full sm:flex-1 px-5 py-3.5 rounded-[14px] text-base"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+              }}
+              required
+            />
+            <button
+              type="submit"
+              disabled={!email}
+              className="btn btn-primary text-base px-8 py-3.5 w-full sm:w-auto whitespace-nowrap disabled:opacity-50"
             >
-              Create your agent
-            </Link>
-            <a
-              href="#"
-              className="btn btn-outline text-base px-8 py-3.5 w-full sm:w-auto"
-            >
-              Find your coach
-            </a>
-          </div>
+              Join the Waitlist
+            </button>
+          </form>
         </div>
 
         {/* Footer */}
@@ -52,6 +75,13 @@ export function FooterCTA() {
           </div>
         </div>
       </div>
+
+      {/* Waitlist Modal */}
+      <WaitlistModal
+        isOpen={showModal}
+        onClose={handleModalClose}
+        email={email}
+      />
     </section>
   );
 }
