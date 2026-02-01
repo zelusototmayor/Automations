@@ -43,12 +43,11 @@ env:
     - REVENUECAT_WEBHOOK_SECRET
     - CORS_ORIGIN
 
-# PostgreSQL database
+# PostgreSQL database (internal network only, no public port)
 accessories:
   db:
     image: postgres:16
     host: 143.110.169.251
-    port: "5432:5432"
     env:
       clear:
         POSTGRES_DB: bettercoaching_production
