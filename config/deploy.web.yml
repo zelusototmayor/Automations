@@ -41,8 +41,7 @@ env:
 # Builder configuration
 builder:
   arch: amd64
-  context: ./web
-  dockerfile: Dockerfile
+  dockerfile: Dockerfile.web
 
 # SSH options
 ssh:
