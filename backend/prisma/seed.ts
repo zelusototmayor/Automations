@@ -102,17 +102,30 @@ async function main() {
   }
   console.log(' Categories created');
 
-  // Create a demo user (password: demo1234)
+  // Create a system creator user for coaches (not the demo user)
+  const creatorPasswordHash = await bcrypt.hash('creator1234', 12);
+  const creatorUser = await prisma.user.upsert({
+    where: { email: 'creator@bettercoaching.app' },
+    update: { subscriptionTier: 'CREATOR' },
+    create: {
+      email: 'creator@bettercoaching.app',
+      passwordHash: creatorPasswordHash,
+      name: 'Better Coaching',
+      subscriptionTier: 'CREATOR',
+    },
+  });
+  console.log(' Creator user created (email: creator@bettercoaching.app)');
+
+  // Create a demo user - regular FREE consumer (password: demo1234)
   const demoPasswordHash = await bcrypt.hash('demo1234', 12);
   const demoUser = await prisma.user.upsert({
     where: { email: 'demo@bettercoaching.app' },
-    update: {},
+    update: { subscriptionTier: 'FREE', subscriptionExpiry: null },
     create: {
       email: 'demo@bettercoaching.app',
       passwordHash: demoPasswordHash,
       name: 'Demo User',
-      subscriptionTier: 'PREMIUM',
-      subscriptionExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      subscriptionTier: 'FREE',
     },
   });
   console.log(' Demo user created (email: demo@bettercoaching.app, password: demo1234)');
@@ -120,7 +133,7 @@ async function main() {
   // Create some sample coaches
   const sampleCoaches = [
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Productivity Pro',
       tagline: 'Your personal productivity and systems coach',
       description:
@@ -163,7 +176,7 @@ Always end with a specific action item or question to keep the conversation movi
       ratingCount: 42,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Mindful Guide',
       tagline: 'Find calm and clarity in your daily life',
       description:
@@ -172,6 +185,7 @@ Always end with a specific action item or question to keep the conversation movi
       category: 'wellness',
       tags: ['mindfulness', 'meditation', 'stress', 'wellness', 'mental-health'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_1' as const,
       systemPrompt: `You are Mindful Guide, a calm and compassionate wellness coach specializing in mindfulness and emotional well-being.
 
 Your approach:
@@ -207,7 +221,7 @@ Remember to breathe and create space in your responses. You're not in a rush.`,
       ratingCount: 28,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Career Catalyst',
       tagline: 'Accelerate your professional growth',
       description:
@@ -216,6 +230,7 @@ Remember to breathe and create space in your responses. You're not in a rush.`,
       category: 'career',
       tags: ['career', 'growth', 'jobs', 'skills', 'leadership'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_2' as const,
       systemPrompt: `You are Career Catalyst, a strategic and insightful career coach. You help professionals at all levels navigate their career journey.
 
 Your expertise includes:
@@ -250,7 +265,7 @@ Be direct and strategic in your advice. Ask clarifying questions about their cur
       ratingCount: 19,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Creative Spark',
       tagline: 'Unlock your creative potential',
       description:
@@ -259,6 +274,7 @@ Be direct and strategic in your advice. Ask clarifying questions about their cur
       category: 'creativity',
       tags: ['creativity', 'writing', 'art', 'ideas', 'inspiration'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_1' as const,
       systemPrompt: `You are Creative Spark, an enthusiastic and playful creativity coach. You help people unlock their creative potential and overcome blocks.
 
 Your style:
@@ -298,7 +314,7 @@ Feel free to use metaphors, ask unexpected questions, and make creativity feel f
     // ════════════════════════════════════════════════════════════════════
 
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Financial Freedom Coach',
       tagline: 'Build wealth and take control of your finances',
       description:
@@ -351,7 +367,7 @@ Response style: Be warm but direct. Use real numbers and examples. Ask about the
       ratingCount: 21,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Relationship Coach',
       tagline: 'Build deeper, more meaningful connections',
       description:
@@ -360,6 +376,7 @@ Response style: Be warm but direct. Use real numbers and examples. Ask about the
       category: 'relationships',
       tags: ['relationships', 'communication', 'dating', 'conflict', 'love'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_2' as const,
       systemPrompt: `You are the Relationship Coach, a warm, empathetic, and insightful guide for all matters of human connection. You help people build healthier, more fulfilling relationships — whether romantic partnerships, friendships, family dynamics, or professional relationships.
 
 Your coaching philosophy:
@@ -405,7 +422,7 @@ Response style: Be warm and validating first — people need to feel heard befor
       ratingCount: 31,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Learning Accelerator',
       tagline: 'Learn anything faster with proven techniques',
       description:
@@ -461,7 +478,7 @@ Response style: Be enthusiastic and specific. When someone asks how to learn som
       ratingCount: 18,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Creative Catalyst',
       tagline: 'Break through creative blocks and build your creative practice',
       description:
@@ -470,6 +487,7 @@ Response style: Be enthusiastic and specific. When someone asks how to learn som
       category: 'creativity',
       tags: ['creativity', 'art', 'writing', 'brainstorming', 'expression'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_1' as const,
       systemPrompt: `You are the Creative Catalyst, a thoughtful and inspiring creativity coach who helps people break through creative blocks and build sustainable creative practices. You work with creators across all mediums — writers, visual artists, musicians, designers, filmmakers, and anyone who creates.
 
 Your coaching philosophy:
@@ -517,7 +535,7 @@ Response style: Be warm, poetic when it fits, but also practical. Use metaphors 
       ratingCount: 15,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Health & Fitness Guide',
       tagline: 'Build sustainable health habits that fit your life',
       description:
@@ -526,6 +544,7 @@ Response style: Be warm, poetic when it fits, but also practical. Use metaphors 
       category: 'wellness',
       tags: ['fitness', 'nutrition', 'health', 'exercise', 'sleep'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_2' as const,
       systemPrompt: `You are the Health & Fitness Guide, a supportive and science-informed wellness coach who helps people build sustainable health habits. You focus on the fundamentals that actually move the needle: consistent movement, quality nutrition, restorative sleep, and stress management.
 
 Your coaching philosophy:
@@ -573,7 +592,7 @@ Response style: Be encouraging without being preachy. Ask about their current fi
       ratingCount: 24,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Leadership Coach',
       tagline: 'Lead with confidence, inspire your team',
       description:
@@ -582,6 +601,7 @@ Response style: Be encouraging without being preachy. Ask about their current fi
       category: 'career',
       tags: ['leadership', 'management', 'teams', 'decisions', 'executive'],
       tier: 'PREMIUM' as const,
+      priceTier: 'TIER_3' as const,
       systemPrompt: `You are the Leadership Coach, a seasoned and thoughtful executive coach who helps current and aspiring leaders grow into the best version of themselves professionally. You draw from frameworks used by top leadership consultants and combine them with practical, real-world management wisdom.
 
 Your coaching philosophy:
@@ -630,7 +650,7 @@ Response style: Be direct and professional while remaining warm and approachable
       ratingCount: 16,
     },
     {
-      creatorId: demoUser.id,
+      creatorId: creatorUser.id,
       name: 'Startup Advisor',
       tagline: 'From idea to launch — build something people want',
       description:
@@ -688,19 +708,55 @@ Response style: Be direct, energetic, and slightly provocative — challenge ass
     },
   ];
 
+  const createdAgents: Record<string, { id: string }> = {};
   for (const coach of sampleCoaches) {
+    // Find existing agent by name (regardless of current creator)
     const existing = await prisma.agent.findFirst({
-      where: {
-        name: coach.name,
-        creatorId: demoUser.id,
-      },
+      where: { name: coach.name },
     });
 
-    if (!existing) {
-      await prisma.agent.create({ data: coach });
+    if (existing) {
+      // Update existing agent's creator and price tier
+      await prisma.agent.update({
+        where: { id: existing.id },
+        data: {
+          creatorId: coach.creatorId,
+          ...(coach.priceTier ? { priceTier: coach.priceTier } : {}),
+        },
+      });
+      createdAgents[coach.name] = existing;
+    } else {
+      const agent = await prisma.agent.create({ data: coach });
+      createdAgents[coach.name] = agent;
     }
   }
   console.log(' Sample coaches created');
+
+  // Create demo purchases: Mindful Guide (TIER_1) and Career Catalyst (TIER_2)
+  const purchaseTargets = [
+    { name: 'Mindful Guide', productId: 'tire_1', priceUsd: 19.99 },
+    { name: 'Career Catalyst', productId: 'tier_2', priceUsd: 49.99 },
+  ];
+
+  for (const target of purchaseTargets) {
+    const agent = createdAgents[target.name];
+    if (agent) {
+      await prisma.coachPurchase.upsert({
+        where: {
+          userId_agentId: { userId: demoUser.id, agentId: agent.id },
+        },
+        update: {},
+        create: {
+          userId: demoUser.id,
+          agentId: agent.id,
+          creatorId: creatorUser.id,
+          productId: target.productId,
+          priceUsd: target.priceUsd,
+        },
+      });
+    }
+  }
+  console.log(' Demo purchases created (Mindful Guide, Career Catalyst)');
 
   console.log('Seeding complete!');
 }

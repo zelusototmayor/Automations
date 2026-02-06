@@ -243,14 +243,6 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="paywall"
-            options={{
-              headerShown: true,
-              headerTitle: 'Upgrade to Premium',
-              presentation: 'modal',
-            }}
-          />
-          <Stack.Screen
             name="context"
             options={{
               headerShown: true,

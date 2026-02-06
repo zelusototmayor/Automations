@@ -53,6 +53,7 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
         category: true,
         tags: true,
         tier: true,
+        priceTier: true,
         greetingMessage: true,
         conversationStarters: true,
         usageCount: true,
@@ -88,6 +89,7 @@ router.get('/featured', async (req: Request, res: Response) => {
         category: true,
         tags: true,
         tier: true,
+        priceTier: true,
         greetingMessage: true,
         usageCount: true,
         ratingAvg: true,
@@ -196,8 +198,8 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
     const canCreate = await canCreateCoach(userId);
     if (!canCreate) {
       res.status(403).json({
-        error: 'Premium subscription required to create coaches',
-        code: 'PREMIUM_REQUIRED',
+        error: 'Creator subscription required to create coaches',
+        code: 'CREATOR_REQUIRED',
       });
       return;
     }
@@ -217,6 +219,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
       conversation_starters,
       knowledge_context,
       voice_id,
+      price_tier,
     } = req.body;
 
     // Validate required fields
@@ -233,6 +236,10 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
       return;
     }
 
+    // Validate price tier if provided
+    const validPriceTiers = ['TIER_1', 'TIER_2', 'TIER_3'];
+    const priceTier = price_tier && validPriceTiers.includes(price_tier) ? price_tier : 'TIER_1';
+
     const agent = await prisma.agent.create({
       data: {
         creatorId: userId,
@@ -243,6 +250,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
         category,
         tags: tags || [],
         tier: 'PREMIUM', // All user-created agents are premium
+        priceTier,
         systemPrompt: system_prompt,
         greetingMessage: greeting_message,
         personalityConfig: personality_config || {
@@ -303,6 +311,7 @@ router.patch('/:id', authenticate, async (req: Request, res: Response) => {
       knowledge_context,
       voice_id,
       is_published,
+      price_tier,
     } = req.body;
 
     const updateData: Prisma.AgentUpdateInput = {};
@@ -322,6 +331,12 @@ router.patch('/:id', authenticate, async (req: Request, res: Response) => {
     if (knowledge_context !== undefined) updateData.knowledgeContext = knowledge_context;
     if (voice_id !== undefined) updateData.voiceId = voice_id;
     if (is_published !== undefined) updateData.isPublished = is_published;
+    if (price_tier !== undefined) {
+      const validPriceTiers = ['TIER_1', 'TIER_2', 'TIER_3'];
+      if (validPriceTiers.includes(price_tier)) {
+        updateData.priceTier = price_tier;
+      }
+    }
 
     const agent = await prisma.agent.update({
       where: { id },

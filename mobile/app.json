@@ -16,8 +16,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zelusottomayor.bettercoaching",
+      "buildNumber": "3",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "We need access to your microphone for voice coaching.",
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a coach avatar."
       }
     },
     "android": {

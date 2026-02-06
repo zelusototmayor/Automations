@@ -5,7 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { authenticate } from '../middleware/auth';
 import { transcribeAudio, isSTTConfigured } from '../services/stt';
-import { isPremiumUser } from '../services/subscription';
+import { hasCoachAccess } from '../services/subscription';
 import multer from 'multer';
 
 const router = Router();
@@ -67,12 +67,19 @@ router.post(
     try {
       const userId = req.userId!;
 
-      // Check premium status (STT is a premium feature)
-      const isPremium = await isPremiumUser(userId);
-      if (!isPremium) {
+      const { agent_id } = req.body;
+
+      if (!agent_id) {
+        res.status(400).json({ error: 'Missing agent_id' });
+        return;
+      }
+
+      // STT is available only to creators or users who purchased this coach
+      const hasAccess = await hasCoachAccess(userId, agent_id);
+      if (!hasAccess) {
         res.status(403).json({
-          error: 'Voice input requires a premium subscription',
-          code: 'PREMIUM_REQUIRED',
+          error: 'Voice input requires lifetime access to this coach',
+          code: 'COACH_ACCESS_REQUIRED',
         });
         return;
       }

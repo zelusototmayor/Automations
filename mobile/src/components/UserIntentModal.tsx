@@ -2,9 +2,8 @@ import { View, Text, TouchableOpacity, Modal, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Web URL for creator subscription flow
-const WEB_CREATOR_URL = process.env.EXPO_PUBLIC_WEB_URL
-  ? `${process.env.EXPO_PUBLIC_WEB_URL}/become-creator`
-  : 'https://bettercoaching.app/become-creator';
+const WEB_CREATOR_URL =
+  process.env.EXPO_PUBLIC_CREATOR_PORTAL_URL || 'https://bettercoaching.app/become-creator';
 
 interface UserIntentModalProps {
   visible: boolean;

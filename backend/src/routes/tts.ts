@@ -8,6 +8,7 @@ import {
   estimateCost,
   ELEVENLABS_VOICES,
 } from '../services/tts';
+import { hasCoachAccess, isCreatorUser } from '../services/subscription';
 
 const router = Router();
 
@@ -90,16 +91,19 @@ router.post('/synthesize', authenticate, async (req: Request, res: Response) => 
       return;
     }
 
-    // Check subscription (TTS is a premium feature)
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { subscriptionTier: true },
-    });
-
-    if (!user || user.subscriptionTier === 'FREE') {
+    // TTS is available only to creators or users who purchased this coach
+    let hasAccess = false;
+    if (agentId) {
+      hasAccess = await hasCoachAccess(userId, agentId);
+    } else {
+      hasAccess = await isCreatorUser(userId);
+    }
+    if (!hasAccess) {
       res.status(403).json({
-        error: 'TTS is a premium feature',
-        code: 'PREMIUM_REQUIRED',
+        error: agentId
+          ? 'TTS requires lifetime access to this coach'
+          : 'TTS preview requires creator access',
+        code: 'COACH_ACCESS_REQUIRED',
       });
       return;
     }

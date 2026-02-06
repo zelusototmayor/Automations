@@ -12,6 +12,31 @@ function getStripe() {
   });
 }
 
+const backendApiUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+
+async function getAuthenticatedUser(request: NextRequest): Promise<{ id: string; email: string } | null> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !backendApiUrl) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${backendApiUrl}/api/auth/me`, {
+      headers: { Authorization: authHeader },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.user ? { id: data.user.id, email: data.user.email } : null;
+  } catch (error) {
+    console.error('Auth verification failed:', error);
+    return null;
+  }
+}
+
 // Creator subscription price IDs - these will be created in Stripe Dashboard
 // For now, we'll create them dynamically
 const CREATOR_PRICES = {
@@ -28,7 +53,12 @@ const CREATOR_PRICES = {
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
-    const { billingPeriod, userId, email } = await request.json();
+    const { billingPeriod } = await request.json();
+
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (!billingPeriod || !['monthly', 'yearly'].includes(billingPeriod)) {
       return NextResponse.json(
@@ -89,14 +119,14 @@ export async function POST(request: NextRequest) {
       ],
       success_url: `${request.headers.get('origin')}/become-creator/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get('origin')}/become-creator`,
-      customer_email: email,
+      customer_email: user.email,
       metadata: {
-        userId: userId || '',
+        userId: user.id,
         billingPeriod,
       },
       subscription_data: {
         metadata: {
-          userId: userId || '',
+          userId: user.id,
           type: 'creator_subscription',
         },
       },

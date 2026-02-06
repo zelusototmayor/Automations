@@ -15,7 +15,7 @@ import { Step6Preview } from '../../src/components/creator/Step6Preview';
 export default function EditCoachScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { isPremium } = useAuthStore();
+  const { isCreator } = useAuthStore();
   const {
     draft,
     currentStep,
@@ -55,6 +55,17 @@ export default function EditCoachScreen() {
       setHasUnsavedChanges(true);
     }
   }, [draft]);
+
+  // Check creator access
+  useEffect(() => {
+    if (!isCreator) {
+      Alert.alert(
+        'Creator Access Required',
+        'You need a creator subscription to edit coaches.',
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    }
+  }, [isCreator]);
 
   // Validation for each step
   const canProceed = (): boolean => {

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, Linking, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +20,9 @@ import {
   SparkleIcon,
   AwardIcon,
 } from '../../src/components/ui/Icons';
+import { getAvatarByHash } from '../../src/utils/avatars';
+import * as revenuecat from '../../src/services/revenuecat';
+import { reconcilePurchases } from '../../src/services/api';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UI DESIGN SPEC V2 - SHARPER AESTHETIC
@@ -167,7 +170,7 @@ function AuthGate() {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, subscription, isAuthenticated, isPremium, signOut } = useAuthStore();
+  const { user, isAuthenticated, isCreator, signOut, purchasedCoaches, loadPurchasedCoaches } = useAuthStore();
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -178,6 +181,29 @@ export default function ProfileScreen() {
         onPress: signOut,
       },
     ]);
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      const restored = await revenuecat.restorePurchases();
+
+      if (!restored) {
+        Alert.alert('Restore Unavailable', 'Purchases are not configured for this build.');
+        return;
+      }
+
+      const result = await reconcilePurchases();
+      await loadPurchasedCoaches();
+
+      const message =
+        result.removed > 0
+          ? `${result.removed} refunded purchase${result.removed !== 1 ? 's' : ''} removed.`
+          : 'Your purchases are up to date.';
+
+      Alert.alert('Restore Complete', message);
+    } catch (error: any) {
+      Alert.alert('Restore Failed', error.message || 'Please try again.');
+    }
   };
 
   if (!isAuthenticated) {
@@ -221,7 +247,7 @@ export default function ProfileScreen() {
               >
                 {user?.name || 'User'}
               </Text>
-              {isPremium && <TierBadge tier="PREMIUM" size="sm" />}
+              {isCreator && <TierBadge tier="CREATOR" size="sm" />}
             </View>
 
             {/* Email */}
@@ -233,34 +259,32 @@ export default function ProfileScreen() {
 
         {/* Subscription Card */}
         <View className="px-5 mb-6">
-          {isPremium ? (
+          {purchasedCoaches.length > 0 ? (
             <View
               className="px-4 py-4 rounded-card flex-row items-center"
-              style={{ backgroundColor: colors.lavenderLight, borderWidth: 1, borderColor: colors.lavender }}
+              style={{ backgroundColor: colors.sageLight, borderWidth: 1, borderColor: colors.sage }}
             >
               <View
                 className="w-10 h-10 rounded-avatar items-center justify-center mr-4"
-                style={{ backgroundColor: colors.lavender }}
+                style={{ backgroundColor: colors.sage }}
               >
                 <AwardIcon size={20} color="white" />
               </View>
               <View className="flex-1">
                 <Text
                   className="font-inter-semibold text-card-title"
-                  style={{ color: colors.lavenderDark }}
+                  style={{ color: colors.sageDark }}
                 >
-                  Premium Member
+                  {purchasedCoaches.length} Coach{purchasedCoaches.length !== 1 ? 'es' : ''} Unlocked
                 </Text>
-                <Text className="text-caption" style={{ color: colors.lavenderDark }}>
-                  {subscription?.expiresAt
-                    ? `Renews ${new Date(subscription.expiresAt).toLocaleDateString()}`
-                    : 'Active subscription'}
+                <Text className="text-caption" style={{ color: colors.sageDark }}>
+                  Lifetime access
                 </Text>
               </View>
             </View>
           ) : (
             <Pressable
-              onPress={() => router.push('/paywall')}
+              onPress={() => router.push('/explore')}
               className="rounded-card overflow-hidden active:opacity-90"
             >
               <LinearGradient
@@ -277,10 +301,10 @@ export default function ProfileScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="font-inter-semibold text-card-title text-white">
-                    Upgrade to Premium
+                    Explore Coaches
                   </Text>
                   <Text className="text-caption text-white opacity-80">
-                    Unlock all coaches & features
+                    5 free messages with any coach
                   </Text>
                 </View>
                 <ChevronRightIcon size={20} color="white" />
@@ -288,6 +312,76 @@ export default function ProfileScreen() {
             </Pressable>
           )}
         </View>
+
+        {/* My Coaches Section */}
+        {purchasedCoaches.length > 0 && (
+          <View className="px-5 mb-6">
+            <Text
+              className="text-label font-inter-semibold uppercase tracking-wide mb-3 ml-1"
+              style={{ color: colors.textMuted, letterSpacing: 1.5 }}
+            >
+              My Coaches
+            </Text>
+            {purchasedCoaches.map((coach) => (
+              <Pressable
+                key={coach.id}
+                onPress={() => router.push(`/coach/${coach.id}`)}
+                className="rounded-card-sm px-4 py-3 mb-3 flex-row items-center active:opacity-90"
+                style={{
+                  backgroundColor: colors.warmWhite,
+                  borderWidth: 1.5,
+                  borderColor: colors.border,
+                  shadowColor: '#111827',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.10,
+                  shadowRadius: 10,
+                  elevation: 3,
+                }}
+              >
+                <Image
+                  source={
+                    coach.avatarUrl && coach.avatarUrl.startsWith('http')
+                      ? { uri: coach.avatarUrl }
+                      : getAvatarByHash(coach.name)
+                  }
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: '#E5E7EB',
+                    marginRight: 12,
+                  }}
+                />
+                <View className="flex-1">
+                  <Text
+                    className="font-inter-medium text-card-title"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    {coach.name}
+                  </Text>
+                  {coach.tagline && (
+                    <Text
+                      className="text-caption"
+                      style={{ color: colors.textMuted }}
+                      numberOfLines={1}
+                    >
+                      {coach.tagline}
+                    </Text>
+                  )}
+                </View>
+                <View
+                  className="px-2 py-1 rounded-full mr-2"
+                  style={{ backgroundColor: colors.sageLight }}
+                >
+                  <Text className="text-[10px] font-inter-semibold" style={{ color: colors.sageDark }}>
+                    Owned
+                  </Text>
+                </View>
+                <ChevronRightIcon size={18} color={colors.textMuted} />
+              </Pressable>
+            ))}
+          </View>
+        )}
 
         {/* Menu Sections */}
         <View className="px-5">
@@ -344,9 +438,21 @@ export default function ProfileScreen() {
             icon={<CreditCardIcon size={20} color={colors.skyDark} />}
             iconBgColor={colors.skyLight}
             iconColor={colors.skyDark}
-            title="Subscription"
-            subtitle={isPremium ? 'Manage your plan' : 'Upgrade to premium'}
-            onPress={() => router.push('/paywall')}
+            title="Restore Purchases"
+            subtitle="Re-sync your lifetime access"
+            onPress={handleRestorePurchases}
+          />
+          <MenuItem
+            icon={<CreditCardIcon size={20} color={colors.skyDark} />}
+            iconBgColor={colors.skyLight}
+            iconColor={colors.skyDark}
+            title="Creator Subscription"
+            subtitle={isCreator ? 'Manage on web' : 'Become a creator'}
+            onPress={() =>
+              Linking.openURL(
+                process.env.EXPO_PUBLIC_CREATOR_PORTAL_URL || 'https://bettercoaching.app/become-creator'
+              )
+            }
           />
           <MenuItem
             icon={<LockIcon size={20} color={colors.lavenderDark} />}

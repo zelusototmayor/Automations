@@ -183,7 +183,7 @@ export default function QuizScreen() {
 
     // Filter by tier if user selected "Free only"
     if (finalAnswers.budget === 'free') {
-      const freeMatches = filtered.filter((agent) => agent.tier === 'free');
+      const freeMatches = filtered.filter((agent) => agent.tier?.toUpperCase() === 'FREE');
       if (freeMatches.length > 0) {
         filtered = freeMatches;
       }

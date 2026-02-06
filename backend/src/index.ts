@@ -28,10 +28,34 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(helmet());
 
-// CORS configuration - allow all origins in development
+// CORS configuration
+const corsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: true, // Reflects the request origin in development
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., mobile apps, curl)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      // If no allowlist provided, allow all (development)
+      if (corsOrigins.length === 0) {
+        callback(null, true);
+        return;
+      }
+
+      if (corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );

@@ -98,21 +98,6 @@ export interface Message {
   created_at: string;
 }
 
-// Subscription types
-export type SubscriptionStatus = 'none' | 'active' | 'cancelled' | 'expired' | 'billing_issue';
-
-export interface Subscription {
-  id: string;
-  user_id: string;
-  revenuecat_id: string;
-  status: SubscriptionStatus;
-  product_id?: string;
-  entitlements: string[];
-  expires_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 // API types
 export interface ChatRequest {
   agent_id: string;

@@ -42,7 +42,7 @@ interface VoiceModeProps {
   agentAvatarUrl?: string;
   onMessage: (text: string, voiceMode?: boolean) => Promise<string>;
   onClose: () => void;
-  isPremium: boolean;
+  hasVoiceAccess: boolean;
 }
 
 type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
@@ -52,7 +52,7 @@ export default function VoiceMode({
   agentName,
   onMessage,
   onClose,
-  isPremium,
+  hasVoiceAccess,
 }: VoiceModeProps) {
   const [state, setState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState<string>('');
@@ -162,7 +162,7 @@ export default function VoiceMode({
         return;
       }
 
-      const { text } = await transcribeAudio(uri);
+      const { text } = await transcribeAudio(uri, agentId);
       setTranscript(text);
 
       if (!text || !text.trim()) {
@@ -186,8 +186,8 @@ export default function VoiceMode({
       const errorMsg = err.message || 'Failed to process audio';
       if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
         setError('Network error - please check your connection');
-      } else if (errorMsg.includes('Premium') || errorMsg.includes('premium')) {
-        setError('Voice mode requires a premium subscription');
+      } else if (errorMsg.includes('lifetime') || errorMsg.includes('access')) {
+        setError('Voice mode requires lifetime access to this coach');
       } else {
         setError(errorMsg);
       }
@@ -246,7 +246,7 @@ export default function VoiceMode({
     setState('idle');
   };
 
-  if (!isPremium) {
+  if (!hasVoiceAccess) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -258,9 +258,9 @@ export default function VoiceMode({
           <View style={styles.lockedIcon}>
             <Ionicons name="lock-closed" size={40} color={colors.sage} />
           </View>
-          <Text style={styles.premiumText}>Voice Mode is Premium</Text>
+          <Text style={styles.premiumText}>Voice Mode is Locked</Text>
           <Text style={styles.premiumSubtext}>
-            Upgrade to have natural voice conversations with your coach
+            Unlock lifetime access to this coach to use voice conversations
           </Text>
         </View>
       </View>

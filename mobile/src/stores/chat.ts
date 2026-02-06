@@ -12,6 +12,10 @@ interface ChatState {
   isStreaming: boolean;
   streamingContent: string;
 
+  // Free trial tracking
+  freeTrialRemaining: number | undefined;
+  freeTrialLimit: number | undefined;
+
   // Loading states
   isLoadingConversations: boolean;
   isLoadingMessages: boolean;
@@ -33,6 +37,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   isStreaming: false,
   streamingContent: '',
+
+  freeTrialRemaining: undefined,
+  freeTrialLimit: undefined,
 
   isLoadingConversations: false,
   isLoadingMessages: false,
@@ -81,7 +88,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     try {
-      const { conversationId: newConvId, fullResponse } = await api.sendMessage(
+      const { conversationId: newConvId, fullResponse, freeTrialRemaining, freeTrialLimit } = await api.sendMessage(
         agentId,
         message,
         conversationId,
@@ -107,6 +114,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         streamingContent: '',
         isStreaming: false,
         isSending: false,
+        freeTrialRemaining,
+        freeTrialLimit,
       }));
 
       // Update conversation ID if new
@@ -149,6 +158,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       messages: [],
       streamingContent: '',
       isStreaming: false,
+      freeTrialRemaining: undefined,
+      freeTrialLimit: undefined,
     });
   },
 

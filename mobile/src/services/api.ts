@@ -1,8 +1,37 @@
 import { getAccessToken, refreshAccessToken } from './auth';
-import type { Agent, Category, Conversation, Message, User, UserContext, Subscription } from '../types';
+import type { Agent, Category, Conversation, Message, User, UserContext } from '../types';
 
 // Default port 3000 matches backend default (PORT=3000 in backend/.env.example)
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bettercoachingapp.com/api';
+
+// Normalize backend agent payloads (camelCase) to mobile-friendly snake_case
+function normalizeAgent(raw: any): Agent {
+  if (!raw) return raw as Agent;
+
+  return {
+    ...raw,
+    creator_id: raw.creator_id ?? raw.creatorId,
+    creator_name: raw.creator_name ?? raw.creatorName,
+    avatar_url: raw.avatar_url ?? raw.avatarUrl,
+    greeting_message: raw.greeting_message ?? raw.greetingMessage ?? '',
+    conversation_starters: raw.conversation_starters ?? raw.conversationStarters ?? [],
+    usage_count: raw.usage_count ?? raw.usageCount ?? 0,
+    rating_avg: raw.rating_avg ?? raw.ratingAvg,
+    rating_count: raw.rating_count ?? raw.ratingCount ?? 0,
+    created_at: raw.created_at ?? raw.createdAt,
+    system_prompt: raw.system_prompt ?? raw.systemPrompt,
+    personality_config: raw.personality_config ?? raw.personalityConfig,
+    model_config: raw.model_config ?? raw.modelConfig,
+    example_conversations: raw.example_conversations ?? raw.exampleConversations,
+    is_published: raw.is_published ?? raw.isPublished,
+    voice_id: raw.voice_id ?? raw.voiceId,
+    knowledge_context: raw.knowledge_context ?? raw.knowledgeContext,
+  } as Agent;
+}
+
+function normalizeAgents(rawAgents: any[] = []): Agent[] {
+  return rawAgents.map(normalizeAgent);
+}
 
 // Helper to get auth headers
 async function getAuthHeaders(): Promise<HeadersInit> {
@@ -59,11 +88,13 @@ export async function getAgents(params?: {
   if (params?.offset) searchParams.set('offset', String(params.offset));
 
   const query = searchParams.toString();
-  return apiFetch(`/agents${query ? `?${query}` : ''}`);
+  const { agents } = await apiFetch<{ agents: Agent[] }>(`/agents${query ? `?${query}` : ''}`);
+  return { agents: normalizeAgents(agents) };
 }
 
 export async function getFeaturedAgents(): Promise<{ agents: Agent[] }> {
-  return apiFetch('/agents/featured');
+  const { agents } = await apiFetch<{ agents: Agent[] }>('/agents/featured');
+  return { agents: normalizeAgents(agents) };
 }
 
 export async function getCategories(): Promise<{ categories: Category[] }> {
@@ -71,29 +102,34 @@ export async function getCategories(): Promise<{ categories: Category[] }> {
 }
 
 export async function getAgent(id: string): Promise<{ agent: Agent }> {
-  return apiFetch(`/agents/${id}`);
+  const { agent } = await apiFetch<{ agent: Agent }>(`/agents/${id}`);
+  return { agent: normalizeAgent(agent) };
 }
 
 export async function getMyAgents(): Promise<{ agents: Agent[] }> {
-  return apiFetch('/agents/mine');
+  const { agents } = await apiFetch<{ agents: Agent[] }>('/agents/mine');
+  return { agents: normalizeAgents(agents) };
 }
 
 export async function createAgent(data: Partial<Agent>): Promise<{ agent: Agent }> {
-  return apiFetch('/agents', {
+  const { agent } = await apiFetch<{ agent: Agent }>('/agents', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+  return { agent: normalizeAgent(agent) };
 }
 
 export async function updateAgent(id: string, data: Partial<Agent>): Promise<{ agent: Agent }> {
-  return apiFetch(`/agents/${id}`, {
+  const { agent } = await apiFetch<{ agent: Agent }>(`/agents/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
+  return { agent: normalizeAgent(agent) };
 }
 
 export async function publishAgent(id: string): Promise<{ agent: Agent }> {
-  return apiFetch(`/agents/${id}/publish`, { method: 'POST' });
+  const { agent } = await apiFetch<{ agent: Agent }>(`/agents/${id}/publish`, { method: 'POST' });
+  return { agent: normalizeAgent(agent) };
 }
 
 export async function deleteAgent(id: string): Promise<{ success: boolean }> {
@@ -116,7 +152,7 @@ export async function sendMessage(
   conversationId?: string,
   onChunk?: (chunk: string) => void,
   voiceMode?: boolean
-): Promise<{ conversationId: string; fullResponse: string }> {
+): Promise<{ conversationId: string; fullResponse: string; freeTrialRemaining?: number; freeTrialLimit?: number }> {
   const headers = await getAuthHeaders();
 
   const response = await fetch(`${API_URL}/chat/message`, {
@@ -139,8 +175,10 @@ export async function sendMessage(
         return sendMessage(agentId, message, conversationId, onChunk, voiceMode);
       }
     }
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || error.code || 'Failed to send message');
+    const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
+    const err: any = new Error(errorData.error || 'Failed to send message');
+    err.code = errorData.code; // Preserve error code (e.g., FREE_TRIAL_EXHAUSTED)
+    throw err;
   }
 
   // Get conversation ID from header
@@ -152,6 +190,8 @@ export async function sendMessage(
   const lines = text.split('\n');
 
   let fullResponse = '';
+  let freeTrialRemaining: number | undefined;
+  let freeTrialLimit: number | undefined;
 
   for (const line of lines) {
     if (line.startsWith('data: ')) {
@@ -163,6 +203,10 @@ export async function sendMessage(
         }
         if (data.conversation_id) {
           convId = data.conversation_id;
+        }
+        if (data.done && data.freeTrialRemaining !== undefined) {
+          freeTrialRemaining = data.freeTrialRemaining;
+          freeTrialLimit = data.freeTrialLimit;
         }
         if (data.error) {
           throw new Error(data.error);
@@ -185,7 +229,16 @@ export async function sendMessage(
     throw new Error('No response received from the coach. Please try again.');
   }
 
-  return { conversationId: convId, fullResponse };
+  return { conversationId: convId, fullResponse, freeTrialRemaining, freeTrialLimit };
+}
+
+export async function getFreeTrialUsage(agentId: string): Promise<{
+  hasAccess: boolean;
+  used?: number;
+  remaining?: number;
+  limit?: number;
+}> {
+  return apiFetch(`/chat/trial/${agentId}`);
 }
 
 export async function getConversations(): Promise<{ conversations: Conversation[] }> {
@@ -216,7 +269,11 @@ export async function getSuggestions(agentId: string): Promise<{
 
 export async function getCurrentUser(): Promise<{
   user: User;
-  subscription: Subscription;
+  creator: {
+    tier: 'FREE' | 'CREATOR';
+    isCreator: boolean;
+    expiresAt: string | null;
+  };
 }> {
   return apiFetch('/users/me');
 }
@@ -288,13 +345,6 @@ export async function getMyAssessmentResponses(agentId?: string): Promise<{
   return apiFetch(`/users/me/assessment-responses${query ? `?${query}` : ''}`);
 }
 
-export async function linkRevenueCat(revenueCatId: string): Promise<{ user: User }> {
-  return apiFetch('/users/me/revenuecat', {
-    method: 'POST',
-    body: JSON.stringify({ revenuecat_id: revenueCatId }),
-  });
-}
-
 // ============================================
 // TTS API
 // ============================================
@@ -303,6 +353,9 @@ export async function synthesizeSpeech(text: string, agentId?: string, voiceId?:
   const token = await getAccessToken();
   if (!token) {
     throw new Error('Not authenticated');
+  }
+  if (!agentId && !voiceId) {
+    throw new Error('Missing agentId for voice synthesis');
   }
 
   const response = await fetch(`${API_URL}/tts/synthesize`, {
@@ -353,7 +406,7 @@ export async function updatePushToken(pushToken: string): Promise<{ success: boo
 // STT (Speech-to-Text) API
 // ============================================
 
-export async function transcribeAudio(audioUri: string): Promise<{
+export async function transcribeAudio(audioUri: string, agentId?: string): Promise<{
   text: string;
   language?: string;
   duration?: number;
@@ -361,6 +414,9 @@ export async function transcribeAudio(audioUri: string): Promise<{
   const token = await getAccessToken();
   if (!token) {
     throw new Error('Not authenticated');
+  }
+  if (!agentId) {
+    throw new Error('Missing agentId for voice transcription');
   }
 
   // Determine file extension from URI
@@ -383,6 +439,7 @@ export async function transcribeAudio(audioUri: string): Promise<{
     type: mimeType,
     name: `audio.${extension}`,
   } as any);
+  formData.append('agent_id', agentId);
 
   const response = await fetch(`${API_URL}/stt/transcribe`, {
     method: 'POST',
@@ -469,4 +526,85 @@ export async function extractInsights(
     method: 'POST',
     body: JSON.stringify({ conversationId }),
   });
+}
+
+// ============================================
+// COACH PURCHASES API
+// ============================================
+
+/**
+ * Get purchased coaches with full agent details
+ */
+export interface PurchasedCoach {
+  id: string;
+  name: string;
+  tagline?: string;
+  avatarUrl?: string;
+  category: string;
+  tier: string;
+  priceTier?: string;
+}
+
+export async function getPurchasedCoaches(): Promise<{
+  coachIds: string[];
+  coaches: PurchasedCoach[];
+}> {
+  return apiFetch('/users/me/purchased-coaches');
+}
+
+/**
+ * Get detailed purchase history
+ */
+export async function getPurchaseHistory(): Promise<{
+  purchases: Array<{
+    agentId: string;
+    agentName: string;
+    productId: string;
+    priceUsd: number | null;
+    purchasedAt: string;
+  }>;
+}> {
+  return apiFetch('/users/me/purchases');
+}
+
+/**
+ * Reconcile purchases with RevenueCat (remove refunded/invalid)
+ */
+export async function reconcilePurchases(): Promise<{
+  removed: number;
+  kept: number;
+  purchases: Array<{
+    agentId: string;
+    agentName: string;
+    productId: string;
+    priceUsd: number | null;
+    purchasedAt: string;
+  }>;
+}> {
+  return apiFetch('/users/me/purchases/reconcile', { method: 'POST' });
+}
+
+/**
+ * Record a coach purchase after RevenueCat transaction
+ */
+export async function recordCoachPurchase(
+  agentId: string,
+  productId: string,
+  transactionId?: string
+): Promise<{ success: boolean }> {
+  return apiFetch('/users/me/purchases', {
+    method: 'POST',
+    body: JSON.stringify({
+      agent_id: agentId,
+      product_id: productId,
+      transaction_id: transactionId,
+    }),
+  });
+}
+
+/**
+ * Check if user has purchased a specific coach
+ */
+export async function hasUserPurchasedCoach(agentId: string): Promise<{ hasPurchased: boolean }> {
+  return apiFetch(`/users/me/purchases/${agentId}`);
 }

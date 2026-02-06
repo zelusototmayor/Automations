@@ -11,7 +11,7 @@ Better Coaching democratizes access to coaching by making it easy for anyone to 
 ### Key Features
 
 - **Browse & Discover**: Find coaches across categories like productivity, wellness, career, and more
-- **1 Free Message**: Try any coach with a free sample message before subscribing
+- **5 Free Messages**: Try any coach with a free preview before unlocking lifetime access
 - **Personal Context**: Add your values, goals, and challenges for personalized coaching
 - **Creator Studio**: Build your own AI coaches with full prompt editing (premium)
 - **Multi-Model Support**: Creators can choose Claude, GPT, or Gemini for their coaches
@@ -174,12 +174,9 @@ The API will be available at `http://localhost:3001`.
 
 ## 💳 Monetization Model
 
-- **Free tier**: Browse coaches, 1 free message per coach
-- **Premium** ($9.99/month or $79.99/year):
-  - Unlimited messaging with all coaches
-  - Create and publish your own coaches
-  - Personalized context injection
-  - Priority response times
+- **Free preview**: Browse coaches + 5 free messages per coach
+- **Lifetime unlock (per coach)**: One-time purchase to unlock unlimited access to that coach
+- **Creator subscription (web only)**: Required to create and publish coaches
 
 ## 🧪 Testing
 

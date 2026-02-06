@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../services/database';
 import { authenticate } from '../middleware/auth';
-import { canSendMessage, recordFreeTrial } from '../services/subscription';
+import { canSendMessage, recordFreeTrial, getFreeTrialUsage, hasCoachAccess } from '../services/subscription';
 import { generateCoachResponse, ChatMessage, AssessmentResultForPrompt } from '../services/llm';
 import { retrieveRelevantChunks, hasKnowledgeSources } from '../services/retrieval';
 import { getInsightsForPrompt, processConversationForInsights } from '../services/insightExtractor';
@@ -33,8 +33,12 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
     }
 
     // Check if user can send message (premium or free trial)
-    const { allowed, reason, freeTrialRemaining, freeTrialLimit } = await canSendMessage(userId, agent_id);
+    const { allowed, reason, freeTrialRemaining, freeTrialLimit, usedFreeTrial } = await canSendMessage(userId, agent_id);
     if (!allowed) {
+      if (reason === 'AGENT_NOT_FOUND') {
+        res.status(404).json({ error: 'Agent not found' });
+        return;
+      }
       res.status(403).json({
         error: 'Free trial exhausted. Subscribe to continue.',
         code: reason,
@@ -208,8 +212,10 @@ router.post('/message', authenticate, async (req: Request, res: Response) => {
         data: { usageCount: { increment: 1 } },
       });
 
-      // Record free trial usage if this was a free trial message
-      await recordFreeTrial(userId, agent_id);
+      // Record free trial usage only when trial was used
+      if (usedFreeTrial) {
+        await recordFreeTrial(userId, agent_id);
+      }
 
       // Extract insights in the background (non-blocking)
       // Only process every 5 messages to avoid excessive API calls
@@ -354,6 +360,28 @@ router.delete('/conversations/:id', authenticate, async (req: Request, res: Resp
   } catch (error) {
     console.error('Error deleting conversation:', error);
     res.status(500).json({ error: 'Failed to delete conversation' });
+  }
+});
+
+/**
+ * GET /chat/trial/:agentId - Get free trial usage for a specific agent
+ */
+router.get('/trial/:agentId', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const agentId = req.params.agentId as string;
+
+    const hasAccess = await hasCoachAccess(userId, agentId);
+    if (hasAccess) {
+      res.json({ hasAccess: true });
+      return;
+    }
+
+    const { used, remaining, limit } = await getFreeTrialUsage(userId, agentId);
+    res.json({ hasAccess: false, used, remaining, limit });
+  } catch (error) {
+    console.error('Error fetching trial usage:', error);
+    res.status(500).json({ error: 'Failed to fetch trial usage' });
   }
 });
 

@@ -143,7 +143,7 @@ const tierConfig: Record<TierType, { variant: BadgeVariant; label: string }> = {
 };
 
 /**
- * Premium tier badge for subscription status
+ * Tier badge for coach or creator status
  *
  * @example
  * <TierBadge tier="PREMIUM" />

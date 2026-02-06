@@ -5,7 +5,9 @@ import { StarRating, SessionCount } from '../ui/Rating';
 import { TierBadge, VerifiedBadge, Badge } from '../ui/Badge';
 import { VerifiedIcon, GiftIcon, PencilIcon, StarIcon, CheckIcon } from '../ui/Icons';
 import type { Agent } from '../../types';
+import { PRICE_TIER_INFO, type PriceTier } from '../../types';
 import { getAvatarByHash } from '../../utils/avatars';
+import { useAuthStore } from '../../stores/auth';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UI DESIGN SPEC V1 COLORS
@@ -123,6 +125,16 @@ export function CoachCard({
   className = '',
 }: CoachCardProps) {
   const router = useRouter();
+  const { purchasedCoachIds } = useAuthStore();
+
+  // Derive price and ownership status (used by multiple variants)
+  const isOwned = purchasedCoachIds.includes(agent.id);
+  const isFree = agent.tier?.toUpperCase() === 'FREE';
+  const priceLabel = isOwned
+    ? 'Owned'
+    : isFree
+      ? 'Free'
+      : PRICE_TIER_INFO[(agent.priceTier as PriceTier) || 'TIER_1']?.label || '$19.99';
 
   const handlePress = () => {
     if (onPress) {
@@ -245,7 +257,7 @@ export function CoachCard({
                   </View>
                 )}
               </View>
-              {agent.tier && agent.tier !== 'free' && (
+              {agent.tier && !isFree && (
                 <TierBadge tier={(agent.tier?.toUpperCase() || 'FREE') as 'FREE' | 'PREMIUM' | 'CREATOR'} />
               )}
             </View>
@@ -413,17 +425,24 @@ export function CoachCard({
             </Text>
           )}
 
-          {/* CTA Button - spec sage CTA color */}
+          {/* CTA Button - dynamic based on ownership/pricing */}
           <Pressable
             onPress={handlePress}
             className="py-1.5 items-center active:opacity-80"
-            style={{ backgroundColor: colors.sage, borderRadius: 14 }}
+            style={{
+              backgroundColor: isOwned ? '#2D7A3A' : colors.sage,
+              borderRadius: 14,
+            }}
           >
             <Text
               className="text-body-sm font-inter-medium"
               style={{ color: 'white' }}
             >
-              Try 5 messages free
+              {isOwned
+                ? 'Continue'
+                : isFree
+                  ? 'Start chatting'
+                  : `Try free · ${PRICE_TIER_INFO[(agent.priceTier as PriceTier) || 'TIER_1']?.label || '$19.99'}`}
             </Text>
           </Pressable>
         </View>
@@ -434,9 +453,6 @@ export function CoachCard({
   // ═══════════════════════════════════════════════════════════════════════════
   // DEFAULT VARIANT - Full card for list views (redesigned per mockup)
   // ═══════════════════════════════════════════════════════════════════════════
-
-  // Derive price from tier
-  const priceText = agent.tier === 'free' ? 'Free' : '€9.99/mo';
 
   return (
     <Pressable
@@ -489,16 +505,16 @@ export function CoachCard({
           <View
             className="ml-2 px-2 py-1 rounded-md"
             style={{
-              backgroundColor: agent.tier === 'free' ? colors.sageLight : colors.lavenderLight,
+              backgroundColor: isOwned ? '#DCF5E0' : isFree ? colors.sageLight : colors.lavenderLight,
             }}
           >
             <Text
               className="text-caption font-inter-medium"
               style={{
-                color: agent.tier === 'free' ? colors.sageDark : colors.lavenderDark,
+                color: isOwned ? '#2D7A3A' : isFree ? colors.sageDark : colors.lavenderDark,
               }}
             >
-              {priceText}
+              {priceLabel}
             </Text>
           </View>
         </View>

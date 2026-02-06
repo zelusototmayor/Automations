@@ -293,7 +293,7 @@ function CoachInfoModal({
             <Text className="text-body text-center mt-1" style={{ color: colors.textSecondary }}>
               {agent.tagline}
             </Text>
-            {agent.tier && agent.tier !== 'free' && (
+            {agent.tier && agent.tier.toUpperCase() !== 'FREE' && (
               <View className="mt-3">
                 <TierBadge tier={(agent.tier?.toUpperCase() || 'FREE') as 'FREE' | 'PREMIUM' | 'CREATOR'} />
               </View>
@@ -396,12 +396,12 @@ function WelcomeView({
   agent,
   suggestions,
   onSuggestionPress,
-  isPremium,
+  hasLifetimeAccess,
 }: {
   agent: Agent;
   suggestions: string[];
   onSuggestionPress: (text: string) => void;
-  isPremium: boolean;
+  hasLifetimeAccess: boolean;
 }) {
   const gradientColors = getAvatarGradient(agent.name);
   const initial = agent.name.charAt(0).toUpperCase();
@@ -434,7 +434,7 @@ function WelcomeView({
           </Text>
 
           {/* Badge */}
-          {agent.tier && agent.tier !== 'free' && (
+          {agent.tier && agent.tier.toUpperCase() !== 'FREE' && (
             <View className="mt-3">
               <TierBadge tier={(agent.tier?.toUpperCase() || 'FREE') as 'FREE' | 'PREMIUM' | 'CREATOR'} />
             </View>
@@ -511,8 +511,8 @@ function WelcomeView({
           </View>
         </View>
 
-        {/* Free Trial Note */}
-        {!isPremium && agent.tier === 'premium' && (
+        {/* Free Trial Note with pricing */}
+        {!hasLifetimeAccess && (
           <View className="px-5 mb-4">
             <View
               className="rounded-xl p-4 flex-row items-center"
@@ -524,7 +524,7 @@ function WelcomeView({
                   Free Preview Available
                 </Text>
                 <Text className="text-body-sm" style={{ color: colors.sage }}>
-                  Try 5 free messages with this coach
+                  Try 5 free messages, then unlock for lifetime access
                 </Text>
               </View>
             </View>
@@ -572,10 +572,12 @@ export default function ChatScreen() {
     fetchConversation,
     clearCurrentConversation,
     startNewConversation,
+    freeTrialRemaining,
+    freeTrialLimit,
   } = useChatStore();
 
   const { fetchAgent } = useAgentsStore();
-  const { isPremium, isAuthenticated } = useAuthStore();
+  const { isAuthenticated, hasAccessToCoach } = useAuthStore();
 
   useEffect(() => {
     loadInitialData();
@@ -672,15 +674,15 @@ export default function ChatScreen() {
         setHasUserSentMessage(false);
       }
 
-      if (error.message === 'FREE_TRIAL_EXHAUSTED') {
+      if (error.code === 'FREE_TRIAL_EXHAUSTED') {
         Alert.alert(
           'Free Trial Used',
-          "You've used all 5 free messages with this coach. Subscribe to continue the conversation.",
+          "You've used all 5 free messages with this coach. Unlock lifetime access to continue.",
           [
             { text: 'Not Now', style: 'cancel' },
             {
-              text: 'Subscribe',
-              onPress: () => router.push('/paywall'),
+              text: 'Unlock Coach',
+              onPress: () => router.push(`/coach/${agentId}`),
             },
           ]
         );
@@ -745,6 +747,10 @@ export default function ChatScreen() {
     );
   }
 
+  const creatorId = (agent as any)?.creatorId || agent?.creator_id;
+  const hasLifetimeAccess = hasAccessToCoach(agent.id, agent.tier, creatorId);
+  const hasVoiceAccess = hasLifetimeAccess;
+
   return (
     <>
       <Stack.Screen
@@ -807,7 +813,7 @@ export default function ChatScreen() {
               agent={agent}
               suggestions={suggestions}
               onSuggestionPress={(text) => handleSend(text)}
-              isPremium={isPremium}
+              hasLifetimeAccess={hasLifetimeAccess}
             />
           ) : (
             <FlatList
@@ -819,12 +825,40 @@ export default function ChatScreen() {
                   message={item}
                   isStreaming={item.id === 'streaming'}
                   agentId={agentId}
-                  showAudioPlayer={isPremium}
+                  showAudioPlayer={hasVoiceAccess}
                 />
               )}
               contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
               showsVerticalScrollIndicator={false}
             />
+          )}
+
+          {/* Free trial counter banner */}
+          {!hasLifetimeAccess && freeTrialRemaining !== undefined && hasUserSentMessage && (
+            <View
+              className="px-4 py-2 flex-row items-center justify-center border-t"
+              style={{
+                backgroundColor: freeTrialRemaining === 0 ? '#FEF2F2' : colors.sageLight,
+                borderColor: freeTrialRemaining === 0 ? '#FECACA' : colors.sage,
+              }}
+            >
+              <Text
+                className="text-caption font-inter-medium"
+                style={{ color: freeTrialRemaining === 0 ? '#991B1B' : colors.sageDark }}
+              >
+                {freeTrialRemaining === 0
+                  ? 'Free trial used — '
+                  : `${freeTrialRemaining} of ${freeTrialLimit || 5} free messages left — `}
+              </Text>
+              <Pressable onPress={() => router.push(`/coach/${agentId}`)}>
+                <Text
+                  className="text-caption font-inter-semibold underline"
+                  style={{ color: freeTrialRemaining === 0 ? '#991B1B' : colors.sageDark }}
+                >
+                  {freeTrialRemaining === 0 ? 'Unlock coach' : 'Unlock full access'}
+                </Text>
+              </Pressable>
+            </View>
           )}
 
           {/* Input Area - always visible */}
@@ -911,7 +945,7 @@ export default function ChatScreen() {
           agentId={agentId!}
           agentName={agent.name}
           agentAvatarUrl={agent.avatar_url}
-          isPremium={isPremium}
+          hasVoiceAccess={hasVoiceAccess}
           onMessage={async (text: string, voiceMode?: boolean) => {
             // Send message with voiceMode flag for conversational response
             setHasUserSentMessage(true);

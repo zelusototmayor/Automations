@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../src/stores/auth';
@@ -50,9 +50,10 @@ function MyCoachCard({ agent }: { agent: Agent }) {
   );
 }
 
-// Premium Gate Component
-function PremiumGate() {
-  const router = useRouter();
+// Creator Gate Component
+function CreatorGate() {
+  const creatorPortalUrl =
+    process.env.EXPO_PUBLIC_CREATOR_PORTAL_URL || 'https://bettercoaching.app/become-creator';
 
   return (
     <View className="flex-1 items-center justify-center px-8">
@@ -67,12 +68,12 @@ function PremiumGate() {
         others use them.
       </Text>
       <TouchableOpacity
-        onPress={() => router.push('/paywall')}
+        onPress={() => Linking.openURL(creatorPortalUrl)}
         className="bg-primary-600 px-8 py-4 rounded-xl"
       >
-        <Text className="text-white font-semibold text-base">Upgrade to Premium</Text>
+        <Text className="text-white font-semibold text-base">Become a Creator</Text>
       </TouchableOpacity>
-      <Text className="text-gray-400 text-sm mt-4">Premium required to create coaches</Text>
+      <Text className="text-gray-400 text-sm mt-4">Creator subscription required</Text>
     </View>
   );
 }
@@ -104,14 +105,14 @@ function AuthGate() {
 
 export default function CreateScreen() {
   const router = useRouter();
-  const { isAuthenticated, isPremium } = useAuthStore();
+  const { isAuthenticated, isCreator } = useAuthStore();
   const { myAgents, isLoadingMyAgents, fetchMyAgents } = useAgentsStore();
 
   useEffect(() => {
-    if (isAuthenticated && isPremium) {
+    if (isAuthenticated && isCreator) {
       fetchMyAgents();
     }
-  }, [isAuthenticated, isPremium]);
+  }, [isAuthenticated, isCreator]);
 
   // Not authenticated
   if (!isAuthenticated) {
@@ -122,11 +123,11 @@ export default function CreateScreen() {
     );
   }
 
-  // Not premium
-  if (!isPremium) {
+  // Not creator
+  if (!isCreator) {
     return (
       <SafeAreaView className="flex-1 bg-background-light" edges={['top']}>
-        <PremiumGate />
+        <CreatorGate />
       </SafeAreaView>
     );
   }

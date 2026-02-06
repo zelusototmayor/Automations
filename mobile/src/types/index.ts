@@ -48,20 +48,29 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  avatar_url?: string;
-  personal_context?: UserContext;
-  has_completed_onboarding?: boolean;
-  context_last_updated_at?: string;
-  context_nudge_dismissed_at?: string;
-  is_creator: boolean;
-  revenuecat_id?: string;
-  created_at: string;
-  updated_at: string;
+  avatarUrl?: string;
+  context?: UserContext;
+  hasCompletedOnboarding?: boolean;
+  contextLastUpdatedAt?: string;
+  contextNudgeDismissedAt?: string;
+  subscriptionTier?: 'FREE' | 'CREATOR';
+  subscriptionExpiry?: string;
+  revenuecatId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Agent/Coach types
 export type AgentTier = 'free' | 'premium';
+export type PriceTier = 'TIER_1' | 'TIER_2' | 'TIER_3';
 export type LLMProvider = 'anthropic' | 'openai' | 'google';
+
+// Price tier info
+export const PRICE_TIER_INFO: Record<PriceTier, { price: number; label: string }> = {
+  TIER_1: { price: 19.99, label: '$19.99' },
+  TIER_2: { price: 49.99, label: '$49.99' },
+  TIER_3: { price: 99.99, label: '$99.99' },
+};
 
 export interface LLMConfig {
   provider: LLMProvider;
@@ -92,6 +101,7 @@ export interface Agent {
   category: string;
   tags: string[];
   tier: AgentTier;
+  priceTier?: PriceTier;  // Price tier for purchases (TIER_1, TIER_2, TIER_3)
   greeting_message: string;
   conversation_starters?: string[];
   usage_count: number;
@@ -148,16 +158,6 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
-}
-
-// Subscription types
-export type SubscriptionStatus = 'none' | 'active' | 'cancelled' | 'expired' | 'billing_issue';
-
-export interface Subscription {
-  status: SubscriptionStatus;
-  product_id?: string;
-  entitlements: string[];
-  expires_at?: string;
 }
 
 // API Response types

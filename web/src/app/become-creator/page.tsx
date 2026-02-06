@@ -79,7 +79,7 @@ const BENEFITS = [
 
 export default function BecomeCreatorPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, accessToken } = useAuthStore();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('yearly');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -97,11 +97,10 @@ export default function BecomeCreatorPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
           billingPeriod,
-          userId: user?.id,
-          email: user?.email,
         }),
       });
 

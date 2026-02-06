@@ -1,7 +1,16 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../services/database';
 import { authenticate } from '../middleware/auth';
-import { getSubscriptionInfo, linkRevenueCat } from '../services/subscription';
+import {
+  getCreatorInfo,
+  linkRevenueCat,
+  getUserPurchases,
+  getUserPurchasedCoaches,
+  recordCoachPurchase,
+  hasUserPurchasedCoach,
+  reconcileUserPurchases,
+  updateCreatorSubscription,
+} from '../services/subscription';
 
 const router = Router();
 
@@ -45,12 +54,12 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
       return;
     }
 
-    // Get subscription info
-    const subscription = await getSubscriptionInfo(userId);
+    // Get creator status
+    const creator = await getCreatorInfo(userId);
 
     res.json({
       user,
-      subscription,
+      creator,
     });
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -248,7 +257,12 @@ router.post('/me/revenuecat', authenticate, async (req: Request, res: Response) 
       return;
     }
 
-    await linkRevenueCat(userId, revenuecat_id);
+    try {
+      await linkRevenueCat(userId, revenuecat_id);
+    } catch (linkError: any) {
+      res.status(400).json({ error: linkError.message || 'Invalid RevenueCat ID' });
+      return;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -266,6 +280,154 @@ router.post('/me/revenuecat', authenticate, async (req: Request, res: Response) 
   } catch (error) {
     console.error('Error linking RevenueCat:', error);
     res.status(500).json({ error: 'Failed to link RevenueCat' });
+  }
+});
+
+// ============================================
+// COACH PURCHASES
+// ============================================
+
+/**
+ * GET /users/me/purchased-coaches - Get purchased coaches with full agent details
+ */
+router.get('/me/purchased-coaches', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+
+    const purchases = await prisma.coachPurchase.findMany({
+      where: { userId },
+      include: {
+        agent: {
+          select: {
+            id: true,
+            name: true,
+            tagline: true,
+            avatarUrl: true,
+            category: true,
+            tier: true,
+            priceTier: true,
+          },
+        },
+      },
+      orderBy: { purchasedAt: 'desc' },
+    });
+
+    const coachIds = purchases.map((p) => p.agentId);
+    const coaches = purchases.map((p) => p.agent);
+
+    res.json({ coachIds, coaches });
+  } catch (error) {
+    console.error('Error fetching purchased coaches:', error);
+    res.status(500).json({ error: 'Failed to fetch purchased coaches' });
+  }
+});
+
+/**
+ * GET /users/me/purchases - Get detailed purchase history
+ */
+router.get('/me/purchases', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const purchases = await getUserPurchases(userId);
+    res.json({ purchases });
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    res.status(500).json({ error: 'Failed to fetch purchases' });
+  }
+});
+
+/**
+ * POST /users/me/purchases/reconcile - Reconcile purchases with RevenueCat
+ * Removes refunded/invalid purchases from local records
+ */
+router.post('/me/purchases/reconcile', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { removed, kept } = await reconcileUserPurchases(userId);
+    const purchases = await getUserPurchases(userId);
+    res.json({ removed, kept, purchases });
+  } catch (error) {
+    console.error('Error reconciling purchases:', error);
+    res.status(500).json({ error: 'Failed to reconcile purchases' });
+  }
+});
+
+/**
+ * POST /users/me/purchases - Record a coach purchase
+ * Called from mobile app after RevenueCat purchase completes
+ */
+router.post('/me/purchases', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { agent_id, product_id, transaction_id } = req.body;
+
+    if (!agent_id || !product_id) {
+      res.status(400).json({ error: 'Missing agent_id or product_id' });
+      return;
+    }
+
+    const result = await recordCoachPurchase(userId, agent_id, product_id, transaction_id);
+
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error recording purchase:', error);
+    res.status(500).json({ error: 'Failed to record purchase' });
+  }
+});
+
+/**
+ * GET /users/me/purchases/:agentId - Check if user has purchased a specific coach
+ */
+router.get('/me/purchases/:agentId', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const agentId = req.params.agentId as string;
+
+    const hasPurchased = await hasUserPurchasedCoach(userId, agentId);
+    res.json({ hasPurchased });
+  } catch (error) {
+    console.error('Error checking purchase:', error);
+    res.status(500).json({ error: 'Failed to check purchase' });
+  }
+});
+
+/**
+ * POST /users/creator/subscription - Update creator subscription (Stripe webhook)
+ * Protected by CREATOR_WEBHOOK_SECRET
+ */
+router.post('/creator/subscription', async (req: Request, res: Response) => {
+  try {
+    const expectedSecret = process.env.CREATOR_WEBHOOK_SECRET;
+    const providedSecret = req.headers['x-creator-webhook-secret'];
+
+    if (!expectedSecret || providedSecret !== expectedSecret) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { userId, status, expiresAt } = req.body as {
+      userId?: string;
+      status?: 'active' | 'cancelled' | 'expired' | 'billing_issue';
+      expiresAt?: string | null;
+    };
+
+    if (!userId || !status) {
+      res.status(400).json({ error: 'Missing userId or status' });
+      return;
+    }
+
+    const expiryDate = expiresAt ? new Date(expiresAt) : null;
+    await updateCreatorSubscription(userId, status, expiryDate);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating creator subscription:', error);
+    res.status(500).json({ error: 'Failed to update creator subscription' });
   }
 });
 

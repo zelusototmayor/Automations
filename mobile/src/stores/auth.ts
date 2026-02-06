@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as authService from '../services/auth';
 import * as api from '../services/api';
+import type { PurchasedCoach } from '../services/api';
 import * as revenuecat from '../services/revenuecat';
 import type { UserContext } from '../types';
 
@@ -10,7 +11,7 @@ interface User {
   email: string;
   name?: string;
   avatarUrl?: string;
-  subscriptionTier: 'FREE' | 'PREMIUM' | 'CREATOR';
+  subscriptionTier: 'FREE' | 'CREATOR';
   subscriptionExpiry?: string;
   context?: any;
   hasCompletedOnboarding?: boolean;
@@ -18,25 +19,27 @@ interface User {
   contextNudgeDismissedAt?: string;
 }
 
-interface Subscription {
-  tier: 'FREE' | 'PREMIUM' | 'CREATOR';
-  isPremium: boolean;
+interface CreatorStatus {
+  tier: 'FREE' | 'CREATOR';
+  isCreator: boolean;
   expiresAt: string | null;
 }
 
 interface AuthState {
   // Session state
   user: User | null;
-  subscription: Subscription | null;
+  creator: CreatorStatus | null;
   isLoading: boolean;
   isInitialized: boolean;
   hasSeenWelcome: boolean;
   hasCompletedOnboarding: boolean;
   showUserIntentModal: boolean;
+  purchasedCoachIds: string[];  // IDs of coaches user has purchased
+  purchasedCoaches: PurchasedCoach[];  // Full details of purchased coaches
 
   // Computed getters
   isAuthenticated: boolean;
-  isPremium: boolean;
+  isCreator: boolean;
 
   // Actions
   initialize: () => Promise<void>;
@@ -47,18 +50,23 @@ interface AuthState {
   updateContext: (context: UserContext) => Promise<void>;
   setHasSeenWelcome: (seen: boolean) => Promise<void>;
   setShowUserIntentModal: (show: boolean) => void;
+  loadPurchasedCoaches: () => Promise<void>;
+  addPurchasedCoach: (coachId: string) => void;
+  hasAccessToCoach: (coachId: string, coachTier: string, creatorId?: string) => boolean;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  subscription: null,
+  creator: null,
   isLoading: true,
   isInitialized: false,
   hasCompletedOnboarding: false,
   hasSeenWelcome: false,
   showUserIntentModal: false,
+  purchasedCoachIds: [],
+  purchasedCoaches: [],
   isAuthenticated: false,
-  isPremium: false,
+  isCreator: false,
 
   initialize: async () => {
     try {
@@ -78,15 +86,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const user = await authService.getCurrentUser();
 
         if (user) {
-          // Fetch full user profile with subscription
+          // Fetch full user profile with creator status
           // Token is now guaranteed to be in memory cache
           try {
-            const { user: fullUser, subscription } = await api.getCurrentUser();
+            const { user: fullUser, creator } = await api.getCurrentUser();
             set({
               user: fullUser as User,
-              subscription,
+              creator,
               isAuthenticated: true,
-              isPremium: subscription?.isPremium || false,
+              isCreator: creator?.isCreator || false,
               hasCompletedOnboarding: (fullUser as any)?.hasCompletedOnboarding || false,
             });
           } catch (error) {
@@ -94,9 +102,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             console.error('Failed to fetch full user profile:', error);
             set({
               user: user as User,
-              subscription: null,
+              creator: null,
               isAuthenticated: true,
-              isPremium: false,
+              isCreator: false,
               hasCompletedOnboarding: false,
             });
           }
@@ -104,14 +112,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           // Initialize RevenueCat with user ID
           await revenuecat.initializeRevenueCat(user.id);
 
-          // Link RevenueCat ID if not already linked
+          // Load purchased coaches
           try {
-            const rcId = await revenuecat.getRevenueCatUserId();
-            if (rcId) {
-              await api.linkRevenueCat(rcId);
-            }
+            const { coachIds, coaches } = await api.getPurchasedCoaches();
+            set({ purchasedCoachIds: coachIds, purchasedCoaches: coaches || [] });
           } catch (e) {
-            // Ignore if already linked or RevenueCat not configured
+            console.error('Error loading purchased coaches:', e);
           }
         } else {
           // Tokens are invalid, clear them
@@ -128,18 +134,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ hasSeenWelcome: false });
       }
 
-      // Listen for RevenueCat updates
-      revenuecat.addCustomerInfoUpdateListener((customerInfo) => {
-        const isPremiumStatus = revenuecat.isPremium(customerInfo);
-        set((state) => ({
-          subscription: {
-            tier: isPremiumStatus ? 'PREMIUM' : 'FREE',
-            isPremium: isPremiumStatus,
-            expiresAt: null,
-          },
-          isPremium: isPremiumStatus,
-        }));
-      });
     } catch (error) {
       console.error('Error initializing auth:', error);
     } finally {
@@ -153,12 +147,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { user } = await authService.register(email, password, name);
 
       // Fetch full profile
-      const { user: fullUser, subscription } = await api.getCurrentUser();
+      const { user: fullUser, creator } = await api.getCurrentUser();
       set({
         user: fullUser as User,
-        subscription,
+        creator,
         isAuthenticated: true,
-        isPremium: subscription?.isPremium || false,
+        isCreator: creator?.isCreator || false,
         // New users start with hasCompletedOnboarding: false
         hasCompletedOnboarding: false,
         // Show user intent modal for new signups
@@ -171,6 +165,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Initialize RevenueCat with user ID
       await revenuecat.identifyUser(user.id);
+
+      // Load purchased coaches (new users won't have any)
+      set({ purchasedCoachIds: [], purchasedCoaches: [] });
     } finally {
       set({ isLoading: false });
     }
@@ -182,12 +179,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { user } = await authService.login(email, password);
 
       // Fetch full profile
-      const { user: fullUser, subscription } = await api.getCurrentUser();
+      const { user: fullUser, creator } = await api.getCurrentUser();
       set({
         user: fullUser as User,
-        subscription,
+        creator,
         isAuthenticated: true,
-        isPremium: subscription?.isPremium || false,
+        isCreator: creator?.isCreator || false,
         hasCompletedOnboarding: (fullUser as any)?.hasCompletedOnboarding || false,
       });
 
@@ -197,6 +194,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Initialize RevenueCat with user ID
       await revenuecat.identifyUser(user.id);
+
+      // Load purchased coaches for returning users
+      try {
+        const { coachIds, coaches } = await api.getPurchasedCoaches();
+        set({ purchasedCoachIds: coachIds, purchasedCoaches: coaches || [] });
+      } catch (e) {
+        console.error('Error loading purchased coaches:', e);
+      }
     } finally {
       set({ isLoading: false });
     }
@@ -207,7 +212,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.logout();
       await revenuecat.logoutUser();
-      set({ user: null, subscription: null, isAuthenticated: false, isPremium: false, hasCompletedOnboarding: false });
+      set({
+        user: null,
+        creator: null,
+        isAuthenticated: false,
+        isCreator: false,
+        hasCompletedOnboarding: false,
+        purchasedCoachIds: [],
+        purchasedCoaches: [],
+      });
     } finally {
       set({ isLoading: false });
     }
@@ -215,12 +228,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshUser: async () => {
     try {
-      const { user, subscription } = await api.getCurrentUser();
+      const { user, creator } = await api.getCurrentUser();
       set({
         user: user as User,
-        subscription,
+        creator,
         isAuthenticated: !!user,
-        isPremium: subscription?.isPremium || false,
+        isCreator: creator?.isCreator || false,
         hasCompletedOnboarding: (user as any)?.hasCompletedOnboarding || false,
       });
     } catch (error) {
@@ -247,5 +260,52 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setShowUserIntentModal: (show: boolean) => {
     set({ showUserIntentModal: show });
+  },
+
+  loadPurchasedCoaches: async () => {
+    const { isAuthenticated } = get();
+    if (!isAuthenticated) {
+      set({ purchasedCoachIds: [], purchasedCoaches: [] });
+      return;
+    }
+
+    try {
+      const { coachIds, coaches } = await api.getPurchasedCoaches();
+      set({ purchasedCoachIds: coachIds, purchasedCoaches: coaches || [] });
+    } catch (error) {
+      console.error('Error loading purchased coaches:', error);
+    }
+  },
+
+  addPurchasedCoach: (coachId: string) => {
+    set((state) => ({
+      purchasedCoachIds: [...state.purchasedCoachIds, coachId],
+    }));
+  },
+
+  hasAccessToCoach: (coachId: string, coachTier: string, creatorId?: string) => {
+    const { user, purchasedCoachIds, isAuthenticated } = get();
+
+    // Not authenticated - no lifetime access
+    if (!isAuthenticated || !user) {
+      return false;
+    }
+
+    // Free coaches are accessible to any authenticated user
+    if (coachTier?.toUpperCase?.() === 'FREE') {
+      return true;
+    }
+
+    // User is the creator of this coach
+    if (creatorId && creatorId === user.id) {
+      return true;
+    }
+
+    // User has purchased this specific coach
+    if (purchasedCoachIds.includes(coachId)) {
+      return true;
+    }
+
+    return false;
   },
 }));

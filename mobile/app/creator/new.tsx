@@ -14,7 +14,7 @@ import { Step6Preview } from '../../src/components/creator/Step6Preview';
 
 export default function NewCoachScreen() {
   const router = useRouter();
-  const { isPremium } = useAuthStore();
+  const { isCreator } = useAuthStore();
   const {
     draft,
     currentStep,
@@ -43,16 +43,16 @@ export default function NewCoachScreen() {
     }
   }, [draft]);
 
-  // Check premium access
+  // Check creator access
   useEffect(() => {
-    if (!isPremium) {
+    if (!isCreator) {
       Alert.alert(
-        'Premium Required',
-        'You need a premium subscription to create coaches.',
+        'Creator Access Required',
+        'You need a creator subscription to create coaches.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
     }
-  }, [isPremium]);
+  }, [isCreator]);
 
   // Validation for each step
   const canProceed = (): boolean => {

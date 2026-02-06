@@ -53,7 +53,7 @@ export default function HomeScreen() {
     fetchConversations,
   } = useChatStore();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, purchasedCoaches, purchasedCoachIds } = useAuthStore();
 
   useEffect(() => {
     fetchFeatured();
@@ -81,14 +81,59 @@ export default function HomeScreen() {
     return acc;
   }, new Map<string, typeof conversations[0]>());
 
-  const deduplicatedConversations = Array.from(uniqueConversations.values())
+  // Build "My Coaches" list: purchased coaches + recent conversation coaches
+  // Purchased coaches come first, then any other recent conversations
+  const myCoachItems: Array<{
+    agentId: string;
+    agentName: string;
+    agentTagline?: string;
+    agentAvatarUrl?: string;
+    isPurchased: boolean;
+    conversationId?: string;
+    updatedAt?: string;
+  }> = [];
+
+  const addedAgentIds = new Set<string>();
+
+  // Add purchased coaches first
+  for (const coach of purchasedCoaches) {
+    const conv = uniqueConversations.get(coach.id);
+    myCoachItems.push({
+      agentId: coach.id,
+      agentName: coach.name,
+      agentTagline: coach.tagline || undefined,
+      agentAvatarUrl: coach.avatarUrl || undefined,
+      isPurchased: true,
+      conversationId: conv?.id,
+      updatedAt: conv?.updatedAt,
+    });
+    addedAgentIds.add(coach.id);
+  }
+
+  // Add remaining recent conversations (not already in purchased)
+  const sortedConversations = Array.from(uniqueConversations.values())
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  // Check if user has any conversations
-  const hasConversations = deduplicatedConversations.length > 0;
+  for (const conv of sortedConversations) {
+    const agentId = conv.agent?.id || conv.agentId;
+    if (!agentId || addedAgentIds.has(agentId)) continue;
+    myCoachItems.push({
+      agentId,
+      agentName: conv.agent?.name || 'Coach',
+      agentTagline: conv.agent?.tagline || undefined,
+      agentAvatarUrl: conv.agent?.avatarUrl || undefined,
+      isPurchased: false,
+      conversationId: conv.id,
+      updatedAt: conv.updatedAt,
+    });
+    addedAgentIds.add(agentId);
+  }
 
-  // Get recent conversations (already deduplicated and sorted)
-  const recentConversations = deduplicatedConversations.slice(0, 5);
+  // Check if user has any coaches or conversations
+  const hasCoachItems = myCoachItems.length > 0;
+
+  // Limit to 6 items
+  const displayedCoachItems = myCoachItems.slice(0, 6);
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
@@ -127,13 +172,13 @@ export default function HomeScreen() {
           />
         )}
 
-        {/* Conditional: Continue Section OR Find Your Coach Card */}
-        {hasConversations ? (
-          /* Continue Section - Shows recent conversations */
+        {/* Conditional: My Coaches / Continue Section OR Find Your Coach Card */}
+        {hasCoachItems ? (
+          /* My Coaches Section - Shows purchased coaches + recent conversations */
           <View className="mb-6">
             <View className="px-5 flex-row justify-between items-center mb-3">
               <Text className="text-section font-inter-semibold text-text-primary">
-                Continue
+                {purchasedCoaches.length > 0 ? 'My Coaches' : 'Continue'}
               </Text>
               <Text
                 className="text-body-sm text-sage-600 font-inter-medium"
@@ -147,32 +192,37 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 20 }}
             >
-              {recentConversations.map((conversation) => {
-                const agent = conversation.agent;
-                if (!agent) return null;
-                // Calculate time ago - use camelCase field from API
-                const updatedAt = new Date(conversation.updatedAt);
-                const now = new Date();
-                const diffMs = now.getTime() - updatedAt.getTime();
-                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-                const diffDays = Math.floor(diffHours / 24);
-                const timeAgo = diffDays > 0
-                  ? `${diffDays}d ago`
-                  : diffHours > 0
-                    ? `${diffHours}h ago`
-                    : 'Just now';
-                // Mock unread status (could come from conversation data)
-                const hasUnread = diffHours < 24;
-                const isPremium = (agent as any).tier && (agent as any).tier !== 'free';
+              {displayedCoachItems.map((item) => {
+                // Calculate time ago if there's a conversation
+                let timeAgo = '';
+                let hasUnread = false;
+                if (item.updatedAt) {
+                  const updatedAt = new Date(item.updatedAt);
+                  const now = new Date();
+                  const diffMs = now.getTime() - updatedAt.getTime();
+                  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                  const diffDays = Math.floor(diffHours / 24);
+                  timeAgo = diffDays > 0
+                    ? `${diffDays}d ago`
+                    : diffHours > 0
+                      ? `${diffHours}h ago`
+                      : 'Just now';
+                  hasUnread = diffHours < 24;
+                }
+
                 return (
                   <Pressable
-                    key={conversation.id}
-                    onPress={() => router.push(`/chat/${agent.id}?conversationId=${conversation.id}`)}
+                    key={item.agentId}
+                    onPress={() =>
+                      item.conversationId
+                        ? router.push(`/chat/${item.agentId}?conversationId=${item.conversationId}`)
+                        : router.push(`/chat/${item.agentId}`)
+                    }
                     className="mr-3 rounded-2xl overflow-hidden"
                     style={{
                       backgroundColor: colors.cardBg,
                       borderWidth: 1.5,
-                      borderColor: colors.cardBorder,
+                      borderColor: item.isPurchased ? colors.sage : colors.cardBorder,
                       width: 170,
                       shadowColor: '#111827',
                       shadowOffset: { width: 0, height: 4 },
@@ -191,23 +241,23 @@ export default function HomeScreen() {
                         position: 'relative',
                       }}
                     >
-                      {/* Premium badge */}
-                      {isPremium && (
+                      {/* Purchased badge */}
+                      {item.isPurchased && (
                         <View
-                          className="absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center"
+                          className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full items-center justify-center"
                           style={{ backgroundColor: colors.sage }}
                         >
-                          <Text className="text-[10px] font-inter-bold text-white">
-                            P
+                          <Text className="text-[9px] font-inter-bold text-white">
+                            Owned
                           </Text>
                         </View>
                       )}
                       {/* Avatar - image or local fallback */}
                       <Image
                         source={
-                          agent.avatarUrl && agent.avatarUrl.startsWith('http')
-                            ? { uri: agent.avatarUrl }
-                            : getAvatarByHash(agent.name)
+                          item.agentAvatarUrl && item.agentAvatarUrl.startsWith('http')
+                            ? { uri: item.agentAvatarUrl }
+                            : getAvatarByHash(item.agentName)
                         }
                         style={{
                           width: 48,
@@ -225,7 +275,7 @@ export default function HomeScreen() {
                         style={{ color: colors.textPrimary }}
                         numberOfLines={1}
                       >
-                        {agent.name}
+                        {item.agentName}
                       </Text>
                       {/* Tagline/subtitle */}
                       <Text
@@ -233,29 +283,40 @@ export default function HomeScreen() {
                         style={{ color: colors.textSecondary }}
                         numberOfLines={1}
                       >
-                        {agent.tagline || 'AI Coach'}
+                        {item.agentTagline || 'AI Coach'}
                       </Text>
-                      {/* Bottom row with unread badge and time */}
+                      {/* Bottom row with badge and time */}
                       <View className="flex-row items-center">
-                        {hasUnread && (
-                          <View
-                            className="px-2 py-0.5 rounded mr-2"
-                            style={{ backgroundColor: '#F0EDE8' }}
-                          >
+                        {timeAgo ? (
+                          <>
+                            {hasUnread && (
+                              <View
+                                className="px-2 py-0.5 rounded mr-2"
+                                style={{ backgroundColor: '#F0EDE8' }}
+                              >
+                                <Text
+                                  className="text-xs font-inter-medium"
+                                  style={{ color: colors.textSecondary }}
+                                >
+                                  Unread
+                                </Text>
+                              </View>
+                            )}
                             <Text
-                              className="text-xs font-inter-medium"
-                              style={{ color: colors.textSecondary }}
+                              className="text-caption"
+                              style={{ color: colors.textMuted }}
                             >
-                              Unread
+                              {timeAgo}
                             </Text>
-                          </View>
+                          </>
+                        ) : (
+                          <Text
+                            className="text-caption"
+                            style={{ color: colors.sage }}
+                          >
+                            Start chatting
+                          </Text>
                         )}
-                        <Text
-                          className="text-caption"
-                          style={{ color: colors.textMuted }}
-                        >
-                          {timeAgo}
-                        </Text>
                       </View>
                     </View>
                   </Pressable>
@@ -264,7 +325,7 @@ export default function HomeScreen() {
             </ScrollView>
           </View>
         ) : (
-          /* Find Your Coach Card - Shows when no conversations */
+          /* Find Your Coach Card - Shows when no conversations or purchases */
           <FindYourCoachCard />
         )}
 

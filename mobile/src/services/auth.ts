@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
-// Default port 3000 matches backend default (PORT=3000 in backend/.env.example)
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+// Default to production API if not configured
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bettercoachingapp.com/api';
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'coachcraft_access_token';
@@ -26,7 +26,7 @@ export interface User {
   email: string;
   name?: string;
   avatarUrl?: string;
-  subscriptionTier: 'FREE' | 'PREMIUM' | 'CREATOR';
+  subscriptionTier: 'FREE' | 'CREATOR';
   subscriptionExpiry?: string;
 }
 

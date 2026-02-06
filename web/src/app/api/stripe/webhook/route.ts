@@ -13,6 +13,36 @@ function getStripe() {
 }
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const backendApiUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+const creatorWebhookSecret = process.env.CREATOR_WEBHOOK_SECRET;
+
+async function notifyCreatorStatusUpdate(
+  userId: string,
+  status: 'active' | 'cancelled' | 'expired' | 'billing_issue',
+  expiresAt?: number | null
+) {
+  if (!backendApiUrl || !creatorWebhookSecret) {
+    console.error('Missing BACKEND_API_URL or CREATOR_WEBHOOK_SECRET');
+    return;
+  }
+
+  try {
+    await fetch(`${backendApiUrl}/api/users/creator/subscription`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-creator-webhook-secret': creatorWebhookSecret,
+      },
+      body: JSON.stringify({
+        userId,
+        status,
+        expiresAt: expiresAt ? new Date(expiresAt * 1000).toISOString() : null,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to notify backend creator status:', error);
+  }
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -41,36 +71,49 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         console.log('Checkout completed:', session.id);
-
-        // TODO: Update user's creator status in database
-        // const userId = session.metadata?.userId;
-        // if (userId) {
-        //   await updateUserCreatorStatus(userId, true);
-        // }
+        // Subscription events will update creator status; no-op here.
         break;
       }
 
       case 'customer.subscription.created': {
         const subscription = event.data.object as Stripe.Subscription;
         console.log('Subscription created:', subscription.id);
+        const userId = subscription.metadata?.userId;
+        if (userId) {
+          const periodEnd = subscription.items.data[0]?.current_period_end;
+          await notifyCreatorStatusUpdate(userId, 'active', periodEnd);
+        }
         break;
       }
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
+        const userId = subscription.metadata?.userId;
+        if (userId) {
+          const status = subscription.status;
+          let creatorStatus: 'active' | 'billing_issue' | 'expired' = 'billing_issue';
+          if (status === 'active' || status === 'trialing') {
+            creatorStatus = 'active';
+          } else if (status === 'past_due' || status === 'unpaid') {
+            creatorStatus = 'billing_issue';
+          } else if (status === 'canceled') {
+            creatorStatus = 'expired';
+          }
+          const periodEnd = subscription.items.data[0]?.current_period_end;
+          await notifyCreatorStatusUpdate(userId, creatorStatus, periodEnd);
+        }
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         console.log('Subscription cancelled:', subscription.id);
-
-        // TODO: Update user's creator status in database
-        // const userId = subscription.metadata?.userId;
-        // if (userId) {
-        //   await updateUserCreatorStatus(userId, false);
-        // }
+        const userId = subscription.metadata?.userId;
+        if (userId) {
+          const periodEnd = subscription.items.data[0]?.current_period_end;
+          await notifyCreatorStatusUpdate(userId, 'expired', periodEnd);
+        }
         break;
       }
 
@@ -83,7 +126,21 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         console.log('Payment failed for invoice:', invoice.id);
-        // TODO: Send email notification to user
+        const subscriptionId = invoice.parent?.subscription_details?.subscription;
+        const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId?.id;
+        if (subId) {
+          try {
+            const stripe = getStripe();
+            const subscription = await stripe.subscriptions.retrieve(subId);
+            const userId = subscription.metadata?.userId;
+            if (userId) {
+              const periodEnd = subscription.items.data[0]?.current_period_end;
+              await notifyCreatorStatusUpdate(userId, 'billing_issue', periodEnd);
+            }
+          } catch (error) {
+            console.error('Failed to retrieve subscription for billing issue:', error);
+          }
+        }
         break;
       }
 

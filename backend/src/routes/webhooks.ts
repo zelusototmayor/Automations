@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { updateSubscription } from '../services/subscription';
+// RevenueCat webhooks are not used for access control in the current model.
 
 const router = Router();
 
@@ -22,7 +22,7 @@ interface RevenueCatWebhookEvent {
 const processedEvents = new Set<string>();
 
 /**
- * POST /webhooks/revenuecat - Handle RevenueCat subscription events
+ * POST /webhooks/revenuecat - Handle RevenueCat events (no-op in current model)
  */
 router.post('/revenuecat', async (req: Request, res: Response) => {
   try {
@@ -63,59 +63,8 @@ router.post('/revenuecat', async (req: Request, res: Response) => {
       eventsArray.slice(-500).forEach((e) => processedEvents.add(e));
     }
 
-    // Handle different event types
-    switch (event.type) {
-      case 'INITIAL_PURCHASE':
-      case 'RENEWAL':
-      case 'UNCANCELLATION':
-        await updateSubscription(
-          event.app_user_id,
-          'active',
-          event.product_id,
-          event.entitlement_ids,
-          new Date(event.expiration_at_ms)
-        );
-        break;
-
-      case 'CANCELLATION':
-        // Subscription cancelled but still active until expiration
-        await updateSubscription(
-          event.app_user_id,
-          'cancelled',
-          event.product_id,
-          event.entitlement_ids,
-          new Date(event.expiration_at_ms)
-        );
-        break;
-
-      case 'EXPIRATION':
-        // Subscription expired, remove entitlements
-        await updateSubscription(event.app_user_id, 'expired', null, [], null);
-        break;
-
-      case 'BILLING_ISSUE':
-        await updateSubscription(
-          event.app_user_id,
-          'billing_issue',
-          event.product_id,
-          event.entitlement_ids,
-          new Date(event.expiration_at_ms)
-        );
-        break;
-
-      case 'PRODUCT_CHANGE':
-        await updateSubscription(
-          event.app_user_id,
-          'active',
-          event.product_id,
-          event.entitlement_ids,
-          new Date(event.expiration_at_ms)
-        );
-        break;
-
-      default:
-        console.log('Unhandled webhook event type:', event.type);
-    }
+    // No-op: RevenueCat webhooks are logged for monitoring only.
+    console.log('RevenueCat webhook received (no-op):', event.type);
 
     res.status(200).json({ received: true });
   } catch (error) {

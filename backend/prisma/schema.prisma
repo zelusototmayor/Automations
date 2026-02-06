@@ -34,7 +34,7 @@ model User {
   pushTokenUpdatedAt      DateTime? @map("push_token_updated_at")
   notificationPreferences Json?     @default("{}") @map("notification_preferences")
 
-  // Subscription info
+  // Creator subscription info
   subscriptionTier   SubscriptionTier @default(FREE) @map("subscription_tier")
   subscriptionExpiry DateTime?        @map("subscription_expiry")
   revenuecatId       String?          @unique @map("revenuecat_id")
@@ -51,6 +51,7 @@ model User {
   integrations  IntegrationConnection[]
   assessmentResponses AssessmentResponse[]
   insights      UserInsight[]
+  coachPurchases CoachPurchase[]
 
   @@map("users")
 }
@@ -69,7 +70,6 @@ model RefreshToken {
 
 enum SubscriptionTier {
   FREE
-  PREMIUM
   CREATOR
 }
 
@@ -89,6 +89,7 @@ model Agent {
   category    String
   tags        String[] @default([])
   tier        AgentTier @default(PREMIUM)
+  priceTier   PriceTier @default(TIER_1) @map("price_tier") // Price tier for purchases
 
   // AI Configuration
   systemPrompt         String   @map("system_prompt")
@@ -128,6 +129,7 @@ model Agent {
   knowledgeSources KnowledgeSource[]
   assessmentResponses AssessmentResponse[]
   userInsights  UserInsight[]
+  purchases     CoachPurchase[]
 
   @@index([category])
   @@index([isPublished])
@@ -138,6 +140,14 @@ model Agent {
 enum AgentTier {
   FREE
   PREMIUM
+}
+
+// Price tier for paid coaches (maps to RevenueCat products)
+// 1 = $19.99 (tire_1), 2 = $49.99 (tier_2), 3 = $99.99 (tier_3)
+enum PriceTier {
+  TIER_1
+  TIER_2
+  TIER_3
 }
 
 // ============================================
@@ -233,6 +243,31 @@ model AgentRating {
 
   @@unique([userId, agentId])
   @@map("agent_ratings")
+}
+
+// ============================================
+// COACH PURCHASES (Lifetime access per coach)
+// ============================================
+
+model CoachPurchase {
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  agentId               String    @map("agent_id")
+  creatorId             String    @map("creator_id") // Coach creator for revenue attribution
+  productId             String    @map("product_id") // RevenueCat product ID (tire_1, tier_2, tier_3)
+  revenuecatTransactionId String? @unique @map("revenuecat_transaction_id")
+  priceUsd              Float?    @map("price_usd") // Actual price paid
+  purchasedAt           DateTime  @default(now()) @map("purchased_at")
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent                 Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, agentId]) // User can only purchase a coach once
+  @@index([userId])
+  @@index([agentId])
+  @@index([creatorId])
+  @@map("coach_purchases")
 }
 
 // ============================================
