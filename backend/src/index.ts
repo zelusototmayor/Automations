@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 
 import authRouter from './routes/auth';
 import agentsRouter from './routes/agents';
@@ -60,6 +61,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Serve static files (avatars, etc.)
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 // --- Rate Limiting ---
 

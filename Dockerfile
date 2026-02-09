@@ -37,6 +37,9 @@ RUN npx prisma generate
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy public assets (avatars, etc.)
+COPY backend/public ./public
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
