@@ -1,0 +1,251 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import Image from 'next/image';
+
+export const metadata: Metadata = {
+  title: 'Terms and Conditions - Better Coaching',
+  description: 'Terms and Conditions for Better Coaching. Read our terms of service governing your use of the platform.',
+};
+
+export default function TermsAndConditions() {
+  return (
+    <main className="min-h-screen">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 glass">
+        <div className="container-landing">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/images/logo-no-bg.png"
+                alt="Better Coaching"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
+              <span className="text-xl font-semibold text-primary" style={{ letterSpacing: '-0.02em' }}>
+                Better Coaching
+              </span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <div className="container-landing py-12 sm:py-16">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="heading-section text-3xl sm:text-4xl">Terms and Conditions</h1>
+          <p className="mt-2 meta-text">Last updated: February 9, 2026</p>
+
+          <div className="mt-10 space-y-8 body-text" style={{ color: 'var(--text-secondary)' }}>
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>1. Acceptance of Terms</h2>
+              <p>
+                By accessing or using the Better Coaching mobile application and website at bettercoachingapp.com (collectively, the &quot;Service&quot;), you agree to be bound by these Terms and Conditions (&quot;Terms&quot;). If you do not agree to these Terms, do not use the Service.
+              </p>
+              <p className="mt-3">
+                We reserve the right to update or modify these Terms at any time. Your continued use of the Service following any changes constitutes your acceptance of the revised Terms.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>2. Description of Service</h2>
+              <p>
+                Better Coaching is a platform that enables creators and coaches to build AI-powered coaching agents based on their expertise and methodologies, and allows users to discover and interact with these coaching agents for personal and professional development.
+              </p>
+              <p className="mt-3">The Service includes:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Browsing and discovering AI coaching agents</li>
+                <li>Interacting with AI coaching agents via conversational interfaces</li>
+                <li>A free preview of up to 5 messages per coaching agent</li>
+                <li>Lifetime unlock purchases for individual coaching agents</li>
+                <li>Creator tools for building and publishing AI coaching agents (Creator Studio)</li>
+                <li>Creator subscription plans for agent management and publishing</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>3. User Accounts</h2>
+              <p>
+                To access certain features of the Service, you must create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mt-3">
+                <li>You must provide accurate and complete information when creating your account.</li>
+                <li>You must be at least 13 years of age to use the Service.</li>
+                <li>You are responsible for all activity that occurs under your account.</li>
+                <li>You must notify us immediately of any unauthorized use of your account.</li>
+                <li>We reserve the right to suspend or terminate accounts that violate these Terms.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>4. AI Coaching Disclaimer</h2>
+              <p>
+                The AI coaching agents available through the Service are powered by artificial intelligence and are based on methodologies and content provided by creators. It is important to understand:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>AI coaching agents are not human coaches, therapists, medical professionals, or licensed counselors.</li>
+                <li>Responses generated by AI coaching agents are for informational and educational purposes only.</li>
+                <li>AI-generated coaching should not be used as a substitute for professional advice, diagnosis, or treatment.</li>
+                <li>We do not guarantee the accuracy, completeness, or reliability of any AI-generated coaching response.</li>
+                <li>You should always consult qualified professionals for medical, legal, financial, or other professional advice.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>5. Payments and Purchases</h2>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>5.1 Lifetime Unlocks</h3>
+              <p>
+                Users may purchase lifetime access to individual coaching agents through the App Store (iOS) or our website. Lifetime unlock purchases are one-time, non-recurring payments that grant permanent access to the selected coaching agent.
+              </p>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>5.2 Creator Subscriptions</h3>
+              <p>
+                Creators may subscribe to plans that allow them to create, manage, and publish AI coaching agents. Creator subscription terms and pricing are as displayed at the time of purchase.
+              </p>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>5.3 In-App Purchases</h3>
+              <p>
+                Purchases made through the iOS App Store are subject to Apple&apos;s terms and conditions. Refunds for in-app purchases are handled by Apple in accordance with their refund policy.
+              </p>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>5.4 Web Purchases</h3>
+              <p>
+                Payments made through the website are processed by Stripe. Refund requests for web purchases should be directed to <a href="mailto:max@zelusottomayor.com" className="font-medium underline" style={{ color: 'var(--text-primary)' }}>max@zelusottomayor.com</a>.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>6. Acceptable Use</h2>
+              <p>You agree not to use the Service to:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Violate any applicable laws or regulations</li>
+                <li>Infringe upon the intellectual property rights of others</li>
+                <li>Harass, abuse, or harm another person</li>
+                <li>Upload or transmit malicious code, viruses, or harmful content</li>
+                <li>Attempt to gain unauthorized access to the Service or its systems</li>
+                <li>Interfere with or disrupt the Service or its infrastructure</li>
+                <li>Use the Service to generate content that is illegal, harmful, or misleading</li>
+                <li>Scrape, data mine, or use automated methods to extract data from the Service</li>
+                <li>Impersonate any person or entity, or misrepresent your affiliation</li>
+                <li>Use AI coaching agents to obtain professional advice that should come from licensed professionals</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>7. Creator Responsibilities</h2>
+              <p>If you use the Service as a creator to build and publish coaching agents, you agree that:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>You own or have the right to use all content and methodologies you upload</li>
+                <li>Your coaching content does not infringe on third-party intellectual property rights</li>
+                <li>Your content is accurate and does not contain misleading information</li>
+                <li>You will not upload content that is illegal, harmful, or inappropriate</li>
+                <li>You are responsible for the quality and accuracy of the coaching methodologies underlying your agents</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>8. Intellectual Property</h2>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>8.1 Our Property</h3>
+              <p>
+                The Service, including its design, features, code, and branding, is owned by Better Coaching and is protected by intellectual property laws. You may not copy, modify, distribute, or create derivative works based on the Service without our express written permission.
+              </p>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>8.2 Your Content</h3>
+              <p>
+                You retain ownership of the content you upload to the Service. By uploading content, you grant Better Coaching a non-exclusive, worldwide license to use, store, process, and display your content solely for the purpose of operating and improving the Service.
+              </p>
+
+              <h3 className="text-lg font-medium mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>8.3 Feedback</h3>
+              <p>
+                Any feedback, suggestions, or ideas you provide about the Service may be used by us without any obligation to you.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>9. Limitation of Liability</h2>
+              <p>
+                To the maximum extent permitted by applicable law, Better Coaching and its officers, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or goodwill, arising out of or related to your use of the Service.
+              </p>
+              <p className="mt-3">
+                Our total liability for any claims arising under these Terms shall not exceed the amount you have paid to us in the twelve (12) months preceding the claim.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>10. Disclaimer of Warranties</h2>
+              <p>
+                The Service is provided on an &quot;as is&quot; and &quot;as available&quot; basis without warranties of any kind, whether express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+              </p>
+              <p className="mt-3">
+                We do not warrant that the Service will be uninterrupted, error-free, or secure, or that any defects will be corrected. We do not warrant the accuracy or completeness of any AI-generated coaching content.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>11. Indemnification</h2>
+              <p>
+                You agree to indemnify and hold harmless Better Coaching and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including reasonable legal fees) arising out of or related to your use of the Service, your violation of these Terms, or your violation of any third-party rights.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>12. Termination</h2>
+              <p>
+                We may suspend or terminate your access to the Service at any time, with or without cause, and with or without notice. Upon termination, your right to use the Service will immediately cease.
+              </p>
+              <p className="mt-3">
+                You may terminate your account at any time by contacting us at <a href="mailto:max@zelusottomayor.com" className="font-medium underline" style={{ color: 'var(--text-primary)' }}>max@zelusottomayor.com</a>. Termination does not entitle you to a refund of any prior purchases, except as required by applicable law.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>13. Governing Law</h2>
+              <p>
+                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Better Coaching operates, without regard to its conflict of law provisions.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>14. Severability</h2>
+              <p>
+                If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain in full force and effect.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>15. Contact Us</h2>
+              <p>
+                If you have any questions about these Terms, please contact us at:
+              </p>
+              <p className="mt-2">
+                <strong>Better Coaching</strong><br />
+                Email: <a href="mailto:max@zelusottomayor.com" className="font-medium underline" style={{ color: 'var(--text-primary)' }}>max@zelusottomayor.com</a>
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="container-landing pb-8">
+        <div className="pt-8" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="meta-text">
+              &copy; {new Date().getFullYear()} Better Coaching. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link href="/privacy" className="meta-text hover:text-primary transition-colors">
+                Privacy
+              </Link>
+              <Link href="/terms" className="meta-text hover:text-primary transition-colors font-medium">
+                Terms
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

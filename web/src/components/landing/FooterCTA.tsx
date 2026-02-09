@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { WaitlistModal } from './WaitlistModal';
 
@@ -65,12 +66,12 @@ export function FooterCTA() {
               &copy; {new Date().getFullYear()} Better Coaching. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
-              <a href="#" className="meta-text hover:text-primary transition-colors">
+              <Link href="/privacy" className="meta-text hover:text-primary transition-colors">
                 Privacy
-              </a>
-              <a href="#" className="meta-text hover:text-primary transition-colors">
+              </Link>
+              <Link href="/terms" className="meta-text hover:text-primary transition-colors">
                 Terms
-              </a>
+              </Link>
             </div>
           </div>
         </div>
