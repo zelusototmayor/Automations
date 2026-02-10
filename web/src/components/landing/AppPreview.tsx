@@ -13,7 +13,7 @@ export function AppPreview() {
           </div>
           <div className="flex-1 mx-4">
             <div className="rounded-full px-3 py-1 text-xs text-center" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-placeholder)' }}>
-              bettercoaching.app/agents/new
+              bettercoachingapp.com/agents/new
             </div>
           </div>
         </div>

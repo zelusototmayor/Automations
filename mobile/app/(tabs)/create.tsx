@@ -53,7 +53,7 @@ function MyCoachCard({ agent }: { agent: Agent }) {
 // Creator Gate Component
 function CreatorGate() {
   const creatorPortalUrl =
-    process.env.EXPO_PUBLIC_CREATOR_PORTAL_URL || 'https://bettercoaching.app/become-creator';
+    process.env.EXPO_PUBLIC_CREATOR_PORTAL_URL || 'https://bettercoachingapp.com/become-creator';
 
   return (
     <View className="flex-1 items-center justify-center px-8">

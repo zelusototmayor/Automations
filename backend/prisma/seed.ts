@@ -138,7 +138,7 @@ async function main() {
       tagline: 'Your personal productivity and systems coach',
       description:
         'I help you build sustainable productivity systems, manage your time effectively, and achieve your goals without burnout.',
-      avatarUrl: 'P',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/productivity-architect.jpg',
       category: 'productivity',
       tags: ['productivity', 'time-management', 'systems', 'goals'],
       tier: 'FREE' as const,
@@ -181,7 +181,7 @@ Always end with a specific action item or question to keep the conversation movi
       tagline: 'Find calm and clarity in your daily life',
       description:
         'A compassionate wellness coach focused on mindfulness, stress management, and emotional well-being.',
-      avatarUrl: 'M',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/mindfulness-guide.webp',
       category: 'wellness',
       tags: ['mindfulness', 'meditation', 'stress', 'wellness', 'mental-health'],
       tier: 'PREMIUM' as const,
@@ -226,7 +226,7 @@ Remember to breathe and create space in your responses. You're not in a rush.`,
       tagline: 'Accelerate your professional growth',
       description:
         'Strategic career coach helping you navigate job transitions, level up your skills, and achieve your professional goals.',
-      avatarUrl: 'C',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/career-navigator.jpeg',
       category: 'career',
       tags: ['career', 'growth', 'jobs', 'skills', 'leadership'],
       tier: 'PREMIUM' as const,
@@ -270,7 +270,7 @@ Be direct and strategic in your advice. Ask clarifying questions about their cur
       tagline: 'Unlock your creative potential',
       description:
         'A playful and inspiring coach for writers, artists, and anyone looking to boost their creativity.',
-      avatarUrl: 'S',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/creative-spark.webp',
       category: 'creativity',
       tags: ['creativity', 'writing', 'art', 'ideas', 'inspiration'],
       tier: 'PREMIUM' as const,
@@ -319,7 +319,7 @@ Feel free to use metaphors, ask unexpected questions, and make creativity feel f
       tagline: 'Build wealth and take control of your finances',
       description:
         'A practical, no-nonsense financial coach who helps you master budgeting, build savings habits, understand investing basics, and work toward financial independence — no matter where you\'re starting from.',
-      avatarUrl: 'F',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/money-mentor.jpeg',
       category: 'finance',
       tags: ['finance', 'budgeting', 'investing', 'savings', 'money'],
       tier: 'FREE' as const,
@@ -372,7 +372,7 @@ Response style: Be warm but direct. Use real numbers and examples. Ask about the
       tagline: 'Build deeper, more meaningful connections',
       description:
         'A warm and insightful coach who helps you navigate the complexities of relationships — from communication challenges and conflict resolution to dating confidence and building lasting emotional intimacy.',
-      avatarUrl: 'R',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/communication-coach.webp',
       category: 'relationships',
       tags: ['relationships', 'communication', 'dating', 'conflict', 'love'],
       tier: 'PREMIUM' as const,
@@ -427,7 +427,7 @@ Response style: Be warm and validating first — people need to feel heard befor
       tagline: 'Learn anything faster with proven techniques',
       description:
         'A science-backed learning coach who helps you master new skills faster using evidence-based study methods, spaced repetition, and knowledge management systems.',
-      avatarUrl: 'L',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/study-strategist.jpg',
       category: 'learning',
       tags: ['learning', 'studying', 'knowledge', 'memory', 'education'],
       tier: 'FREE' as const,
@@ -483,7 +483,7 @@ Response style: Be enthusiastic and specific. When someone asks how to learn som
       tagline: 'Break through creative blocks and build your creative practice',
       description:
         'A thoughtful and inspiring coach dedicated to helping you overcome creative resistance, develop sustainable creative habits, and bring your artistic vision to life — whether you write, design, paint, make music, or create in any medium.',
-      avatarUrl: 'K',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/creative-spark.webp',
       category: 'creativity',
       tags: ['creativity', 'art', 'writing', 'brainstorming', 'expression'],
       tier: 'PREMIUM' as const,
@@ -540,7 +540,7 @@ Response style: Be warm, poetic when it fits, but also practical. Use metaphors 
       tagline: 'Build sustainable health habits that fit your life',
       description:
         'A supportive and knowledgeable fitness coach who helps you build sustainable exercise routines, improve your nutrition, optimize your sleep, and boost your daily energy — with practical advice tailored to your lifestyle.',
-      avatarUrl: 'H',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/fitness-nutrition-guide.jpg',
       category: 'wellness',
       tags: ['fitness', 'nutrition', 'health', 'exercise', 'sleep'],
       tier: 'PREMIUM' as const,
@@ -597,7 +597,7 @@ Response style: Be encouraging without being preachy. Ask about their current fi
       tagline: 'Lead with confidence, inspire your team',
       description:
         'An experienced leadership coach who helps managers and aspiring leaders develop their management skills, build high-performing teams, make better decisions, and develop executive presence.',
-      avatarUrl: 'E',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/leadership-mentor.jpeg',
       category: 'career',
       tags: ['leadership', 'management', 'teams', 'decisions', 'executive'],
       tier: 'PREMIUM' as const,
@@ -655,7 +655,7 @@ Response style: Be direct and professional while remaining warm and approachable
       tagline: 'From idea to launch — build something people want',
       description:
         'A practical startup coach who helps first-time founders and aspiring entrepreneurs validate ideas, build MVPs, find product-market fit, and navigate the early stages of building a company.',
-      avatarUrl: 'A',
+      avatarUrl: 'https://api.bettercoachingapp.com/public/avatars/startup-guide.jpg',
       category: 'career',
       tags: ['startup', 'entrepreneur', 'MVP', 'business', 'growth'],
       tier: 'FREE' as const,

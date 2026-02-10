@@ -40,7 +40,9 @@ env:
     NODE_ENV: production
     PORT: "3001"
     NEXT_PUBLIC_API_URL: https://api.bettercoachingapp.com
+    BACKEND_API_URL: https://api.bettercoachingapp.com
   secret:
+    - STRIPE_SECRET_KEY
     - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     - NEXT_PUBLIC_MIXPANEL_TOKEN
 
@@ -48,6 +50,11 @@ env:
 builder:
   arch: amd64
   dockerfile: Dockerfile.web
+  args:
+    NEXT_PUBLIC_API_URL: https://api.bettercoachingapp.com
+  secrets:
+    - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    - NEXT_PUBLIC_MIXPANEL_TOKEN
 
 # SSH options
 ssh:
