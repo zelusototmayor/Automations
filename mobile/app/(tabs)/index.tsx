@@ -400,7 +400,7 @@ export default function HomeScreen() {
             className="w-8 h-8 rounded-full items-center justify-center mr-3"
             style={{ backgroundColor: colors.sageLight }}
           >
-            <Text className="text-body-sm" style={{ color: colors.sageDark }}>🏠</Text>
+            <Text className="text-body-sm" style={{ color: colors.sageDark }}>+</Text>
           </View>
           <Text
             className="flex-1 font-inter-medium text-body"

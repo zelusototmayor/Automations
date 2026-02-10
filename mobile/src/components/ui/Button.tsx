@@ -123,12 +123,11 @@ export function Button({
   return (
     <Pressable
       disabled={isDisabled}
-      className={[
-        'flex-row items-center justify-center',
-        fullWidth && 'w-full',
-        className,
-      ].filter(Boolean).join(' ')}
       style={({ pressed }) => ({
+        flexDirection: 'row' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        width: fullWidth ? '100%' : undefined,
         height: sizeStyle.height,
         paddingHorizontal: sizeStyle.paddingHorizontal,
         borderRadius: sizeStyle.borderRadius,

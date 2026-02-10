@@ -10,12 +10,24 @@ interface VideoSplashProps {
 export default function VideoSplash({ onFinish }: VideoSplashProps) {
   const videoRef = useRef<Video>(null);
   const [isFinished, setIsFinished] = useState(false);
+  const hasFinished = useRef(false);
+
+  const finish = () => {
+    if (hasFinished.current) return;
+    hasFinished.current = true;
+    setIsFinished(true);
+    setTimeout(onFinish, 300);
+  };
+
+  // Safety timeout: auto-dismiss after 5 seconds if video never finishes
+  useEffect(() => {
+    const timeout = setTimeout(finish, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded && status.didJustFinish) {
-      setIsFinished(true);
-      // Give a brief moment before transitioning
-      setTimeout(onFinish, 300);
+      finish();
     }
   };
 

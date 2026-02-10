@@ -2,7 +2,7 @@ import { getAccessToken, refreshAccessToken } from './auth';
 import type { Agent, Category, Conversation, Message, User, UserContext } from '../types';
 
 // Default port 3000 matches backend default (PORT=3000 in backend/.env.example)
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bettercoachingapp.com/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.bettercoachingapp.com/api';
 
 // Normalize backend agent payloads (camelCase) to mobile-friendly snake_case
 function normalizeAgent(raw: any): Agent {
@@ -278,10 +278,20 @@ export async function getCurrentUser(): Promise<{
   return apiFetch('/users/me');
 }
 
-export async function updateUser(data: Partial<User>): Promise<{ user: User }> {
+export async function updateUser(
+  data: Partial<User> & { avatar_url?: string }
+): Promise<{ user: User }> {
+  const payload: Record<string, any> = { ...data };
+
+  if (data.avatarUrl !== undefined && data.avatar_url === undefined) {
+    payload.avatar_url = data.avatarUrl;
+  }
+
+  delete payload.avatarUrl;
+
   return apiFetch('/users/me', {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 

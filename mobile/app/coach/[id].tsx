@@ -6,6 +6,8 @@ import {
   Pressable,
   ActivityIndicator,
   Alert,
+  Image,
+  StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +20,7 @@ import type { Agent, PriceTier } from '../../src/types';
 import { PRICE_TIER_INFO } from '../../src/types';
 import * as revenuecat from '../../src/services/revenuecat';
 import { recordCoachPurchase, getFreeTrialUsage } from '../../src/services/api';
+import { getAvatarByHash } from '../../src/utils/avatars';
 
 export default function CoachDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -164,9 +167,14 @@ export default function CoachDetailScreen() {
         {/* Hero Section */}
         <View className="items-center px-5 pb-6">
           {/* Avatar */}
-          <View className="bg-primary-50 rounded-2xl w-28 h-28 items-center justify-center mb-4 shadow-card">
-            <Text className="text-6xl">{agent.avatar_url || ''}</Text>
-          </View>
+          <Image
+            source={
+              agent.avatar_url && agent.avatar_url.startsWith('http')
+                ? { uri: agent.avatar_url }
+                : getAvatarByHash(agent.name)
+            }
+            style={styles.avatar}
+          />
 
           {/* Name and Verification */}
           <View className="flex-row items-center mb-2">
@@ -346,57 +354,123 @@ export default function CoachDetailScreen() {
         )}
 
         {/* Spacer for fixed button */}
-        <View className="h-28" />
+        <View style={{ height: 200 }} />
       </ScrollView>
 
-      {/* Fixed CTA Button */}
-      <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-border px-5 py-4 pb-8">
-        {isFreeCoach ? (
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
+      {/* Floating CTA Button */}
+      <View style={styles.ctaContainer}>
+        {isFreeCoach || hasAccess ? (
+          <Pressable
             onPress={handleStartChat}
+            style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
           >
-            {isAuthenticated ? 'Start Chatting' : 'Sign In to Chat'}
-          </Button>
-        ) : hasAccess ? (
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onPress={handleStartChat}
-          >
-            Start Chatting
-          </Button>
+            <Text style={styles.ctaButtonText}>
+              {!isAuthenticated ? 'Sign In to Chat' : 'Start Chatting'}
+            </Text>
+          </Pressable>
         ) : (
-          <View>
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
+          <>
+            <Pressable
               onPress={handleStartChat}
-              disabled={isPurchasing}
+              style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
             >
-              Start Free Trial
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              fullWidth
+              <Text style={styles.ctaButtonText}>
+                {trialRemaining !== null && trialRemaining > 0
+                  ? `Try Free · ${trialRemaining} of ${trialLimit} left`
+                  : 'Start Chatting'}
+              </Text>
+            </Pressable>
+            <Pressable
               onPress={handlePurchase}
-              loading={isPurchasing}
               disabled={isPurchasing}
-              className="mt-3"
+              style={({ pressed }) => [
+                styles.ctaButtonOutline,
+                pressed && styles.ctaButtonOutlinePressed,
+                isPurchasing && styles.ctaButtonDisabled,
+              ]}
             >
-              {isPurchasing ? 'Processing...' : `Unlock Coach · ${productPrice || PRICE_TIER_INFO[agent.priceTier as PriceTier]?.label || '$19.99'}`}
-            </Button>
-            <Text className="text-caption text-text-muted text-center mt-2">
+              <Text style={styles.ctaButtonOutlineText}>
+                {isPurchasing
+                  ? 'Processing...'
+                  : `Unlock Full Coach · ${productPrice || PRICE_TIER_INFO[agent.priceTier as PriceTier]?.label || '$19.99'}`}
+              </Text>
+            </Pressable>
+            <Text style={styles.ctaSubtext}>
               One-time purchase · Lifetime access
             </Text>
-          </View>
+          </>
         )}
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  avatar: {
+    width: 112,
+    height: 112,
+    borderRadius: 28,
+    backgroundColor: '#E5E7EB',
+    marginBottom: 16,
+  },
+  ctaContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 40,
+    backgroundColor: '#F5F5F7',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  ctaButton: {
+    backgroundColor: '#4F6F5A',
+    borderRadius: 50,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1F3F2A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ctaButtonPressed: {
+    backgroundColor: '#3D5A47',
+    shadowOpacity: 0.15,
+  },
+  ctaButtonOutline: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 50,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    borderWidth: 2,
+    borderColor: '#4F6F5A',
+  },
+  ctaButtonOutlinePressed: {
+    backgroundColor: '#F0F5F1',
+  },
+  ctaButtonDisabled: {
+    opacity: 0.6,
+  },
+  ctaButtonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  ctaButtonOutlineText: {
+    color: '#4F6F5A',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  ctaSubtext: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+});

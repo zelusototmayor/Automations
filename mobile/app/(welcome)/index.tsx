@@ -153,14 +153,30 @@ export default function WelcomeScreen() {
               opacity: logoOpacity,
             }}
           >
-            <Image
-              source={require('../../assets/logo-no-bg.png')}
+            <View
               style={{
                 width: 120,
                 height: 120,
+                borderRadius: 30,
+                backgroundColor: '#2F4F3A',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#1F3F2A',
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.25,
+                shadowRadius: 16,
+                elevation: 8,
               }}
-              resizeMode="contain"
-            />
+            >
+              <Image
+                source={require('../../assets/logo-no-bg.png')}
+                style={{
+                  width: 100,
+                  height: 100,
+                }}
+                resizeMode="contain"
+              />
+            </View>
           </Animated.View>
 
           {/* App Name & Tagline */}

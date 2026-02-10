@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 // Default to production API if not configured
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://bettercoachingapp.com/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.bettercoachingapp.com/api';
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'coachcraft_access_token';

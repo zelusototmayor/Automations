@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,28 +40,28 @@ export default function AuthScreen() {
       } else {
         await signUp(email.trim(), password);
       }
-      router.back();
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Authentication failed');
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface">
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1"
+        style={styles.flex}
       >
-        <View className="flex-1 px-6 pt-8">
+        <View style={styles.content}>
           {/* Header */}
-          <View className="items-center mb-8">
-            <View className="bg-sage-100 rounded-full w-20 h-20 items-center justify-center mb-4">
-              <Text className="text-4xl"></Text>
+          <View style={styles.header}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconEmoji}>{'\u{1F331}'}</Text>
             </View>
-            <Text className="text-2xl font-bold text-gray-900">
+            <Text style={styles.title}>
               {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
             </Text>
-            <Text className="text-gray-500 mt-2 text-center">
+            <Text style={styles.subtitle}>
               {mode === 'signin'
                 ? 'Sign in to continue your coaching journey'
                 : 'Join Better Coaching to start your journey'}
@@ -68,11 +69,11 @@ export default function AuthScreen() {
           </View>
 
           {/* Form */}
-          <View className="space-y-4">
+          <View>
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-1 ml-1">Email</Text>
+              <Text style={styles.label}>Email</Text>
               <TextInput
-                className="bg-white rounded-xl px-4 py-4 text-gray-900 border border-gray-200"
+                style={styles.input}
                 placeholder="your@email.com"
                 placeholderTextColor="#9CA3AF"
                 value={email}
@@ -83,10 +84,10 @@ export default function AuthScreen() {
               />
             </View>
 
-            <View className="mt-4">
-              <Text className="text-sm font-medium text-gray-700 mb-1 ml-1">Password</Text>
+            <View style={styles.fieldSpacing}>
+              <Text style={styles.label}>Password</Text>
               <TextInput
-                className="bg-white rounded-xl px-4 py-4 text-gray-900 border border-gray-200"
+                style={styles.input}
                 placeholder="••••••••"
                 placeholderTextColor="#9CA3AF"
                 value={password}
@@ -97,12 +98,10 @@ export default function AuthScreen() {
             </View>
 
             {mode === 'signup' && (
-              <View className="mt-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1 ml-1">
-                  Confirm Password
-                </Text>
+              <View style={styles.fieldSpacing}>
+                <Text style={styles.label}>Confirm Password</Text>
                 <TextInput
-                  className="bg-white rounded-xl px-4 py-4 text-gray-900 border border-gray-200"
+                  style={styles.input}
                   placeholder="••••••••"
                   placeholderTextColor="#9CA3AF"
                   value={confirmPassword}
@@ -117,26 +116,26 @@ export default function AuthScreen() {
             <TouchableOpacity
               onPress={handleSubmit}
               disabled={isLoading}
-              className="bg-sage-600 py-4 rounded-xl items-center mt-6"
+              style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-white font-semibold text-base">
+                <Text style={styles.submitButtonText}>
                   {mode === 'signin' ? 'Sign In' : 'Create Account'}
                 </Text>
               )}
             </TouchableOpacity>
 
             {/* Toggle Mode */}
-            <View className="flex-row items-center justify-center mt-6">
-              <Text className="text-gray-500">
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleText}>
                 {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
               </Text>
               <TouchableOpacity
                 onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
               >
-                <Text className="text-sage-600 font-semibold">
+                <Text style={styles.toggleLink}>
                   {mode === 'signin' ? 'Sign Up' : 'Sign In'}
                 </Text>
               </TouchableOpacity>
@@ -146,12 +145,117 @@ export default function AuthScreen() {
           {/* Close Button */}
           <TouchableOpacity
             onPress={() => router.back()}
-            className="absolute top-4 right-4 w-10 h-10 items-center justify-center"
+            style={styles.closeButton}
           >
-            <Text className="text-gray-400 text-2xl">✕</Text>
+            <Text style={styles.closeButtonText}>{'\u2715'}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F7',
+  },
+  flex: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  iconCircle: {
+    backgroundColor: '#DCE9DF',
+    borderRadius: 40,
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  iconEmoji: {
+    fontSize: 36,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  subtitle: {
+    color: '#6B7280',
+    marginTop: 8,
+    textAlign: 'center',
+    fontSize: 15,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    color: '#111827',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    fontSize: 16,
+  },
+  fieldSpacing: {
+    marginTop: 16,
+  },
+  submitButton: {
+    backgroundColor: '#4F6F5A',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  toggleText: {
+    color: '#6B7280',
+    fontSize: 14,
+  },
+  toggleLink: {
+    color: '#4F6F5A',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonText: {
+    color: '#9CA3AF',
+    fontSize: 24,
+  },
+});

@@ -265,6 +265,48 @@ export default function RootLayout() {
               presentation: 'modal',
             }}
           />
+          <Stack.Screen
+            name="profile/edit"
+            options={{
+              headerShown: true,
+              headerTitle: 'Edit Profile',
+            }}
+          />
+          <Stack.Screen
+            name="profile/notifications"
+            options={{
+              headerShown: true,
+              headerTitle: 'Notifications',
+            }}
+          />
+          <Stack.Screen
+            name="profile/privacy-security"
+            options={{
+              headerShown: true,
+              headerTitle: 'Privacy & Security',
+            }}
+          />
+          <Stack.Screen
+            name="profile/help"
+            options={{
+              headerShown: true,
+              headerTitle: 'Help & FAQ',
+            }}
+          />
+          <Stack.Screen
+            name="profile/contact"
+            options={{
+              headerShown: true,
+              headerTitle: 'Contact Us',
+            }}
+          />
+          <Stack.Screen
+            name="profile/legal"
+            options={{
+              headerShown: true,
+              headerTitle: 'Terms & Privacy',
+            }}
+          />
         </Stack>
         {showVideoSplash && (
           <VideoSplash onFinish={() => setShowVideoSplash(false)} />
