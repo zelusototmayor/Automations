@@ -65,12 +65,13 @@ function Avatar({ agent, size, borderRadius, showInitial = true }: AvatarProps) 
   const gradientColors = getAvatarGradient(agent.name);
   const initial = getInitial(agent.name);
 
-  // Use avatar_url if available, otherwise use local avatar based on hash, otherwise gradient
-  const avatarSource = agent.avatar_url
+  // Use avatar_url if it's a valid HTTP URL, otherwise use local avatar based on hash, otherwise gradient
+  const hasValidUrl = agent.avatar_url?.startsWith('http');
+  const avatarSource = hasValidUrl
     ? { uri: agent.avatar_url }
     : getAvatarByHash(agent.name);
 
-  if (agent.avatar_url || !showInitial) {
+  if (hasValidUrl || !showInitial) {
     return (
       <View style={{ width: size, height: size, borderRadius, overflow: 'hidden' }}>
         <Image
@@ -338,7 +339,7 @@ export function CoachCard({
             {/* Photo */}
             <View className="relative" style={{ width: 68, height: 80, borderRadius: 18, overflow: 'hidden' }}>
               <Image
-                source={agent.avatar_url ? { uri: agent.avatar_url } : getAvatarByHash(agent.name)}
+                source={agent.avatar_url?.startsWith('http') ? { uri: agent.avatar_url } : getAvatarByHash(agent.name)}
                 style={{ width: 68, height: 80 }}
                 resizeMode="cover"
               />
